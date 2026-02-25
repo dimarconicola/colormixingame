@@ -11,7 +11,8 @@
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "validate": "pnpm run build && node dist/cli-validate.js"
+    "validate": "pnpm run build && node dist/cli-validate.js",
+    "authoring:template": "pnpm run build && node dist/cli-authoring.js"
   },
   "dependencies": {
     "@colormix/color-engine": "workspace:*"

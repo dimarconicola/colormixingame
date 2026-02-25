@@ -1,3 +1,4 @@
+import { DEFAULT_GAME_CONTENT } from "@colormix/content";
 import { rgbToHex, type PerceptualMatchScore } from "@colormix/color-engine";
 import { MixCanvas } from "@colormix/mix-canvas";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,9 +14,13 @@ import {
   createDiaryEntryFromDiscriminate,
   createDiaryEntryFromPredict,
   createDiaryEntryFromSolve,
+  getDailyDiaryPrompt,
+  mergeDiaryEntries,
+  parseDiaryEntries,
   prependDiaryEntry,
   readDiaryEntries,
   removeDiaryEntry,
+  serializeDiaryEntries,
   selectDiaryEntries,
   updateDiaryEntry,
   writeDiaryEntries,
@@ -33,7 +38,11 @@ import {
 } from "./predict";
 import {
   createUiSoundPlayer,
+  readColorAssistEnabled,
+  readHighContrastEnabled,
   readSoundEnabled,
+  writeColorAssistEnabled,
+  writeHighContrastEnabled,
   writeSoundEnabled,
   type SoundCue,
   type UiSoundPlayer
@@ -56,6 +65,43 @@ type GameMode = "solve" | "predict" | "discriminate" | "collect";
 type SolvePhase = "landing" | "mixing" | "result";
 type PredictPhase = "landing" | "guessing" | "result";
 type DiscriminatePhase = "landing" | "guessing" | "result";
+type ChallengePackOption = {
+  id: string;
+  title: string;
+  challengeIds: readonly string[];
+};
+
+const ALL_PACK_ID = "all";
+
+const CONTENT_PACKS: readonly ChallengePackOption[] = (DEFAULT_GAME_CONTENT.packs ?? []).map((pack) => ({
+  id: pack.id,
+  title: pack.title,
+  challengeIds: pack.challengeIds
+}));
+
+function filterChallengePool<TChallenge extends { id: string }>(
+  challenges: readonly TChallenge[],
+  selectedPackId: string
+): readonly TChallenge[] {
+  if (selectedPackId === ALL_PACK_ID) {
+    return challenges;
+  }
+
+  const pack = CONTENT_PACKS.find((candidate) => candidate.id === selectedPackId);
+
+  if (!pack) {
+    return challenges;
+  }
+
+  const allowedIds = new Set(pack.challengeIds);
+  const filtered = challenges.filter((challenge) => allowedIds.has(challenge.id));
+
+  return filtered.length > 0 ? filtered : challenges;
+}
+
+function formatAssistLabel(color: { r: number; g: number; b: number }): string {
+  return `R${color.r} G${color.g} B${color.b}`;
+}
 
 export function App() {
   const canvasHostRef = useRef<HTMLDivElement | null>(null);
@@ -63,6 +109,9 @@ export function App() {
 
   const [mode, setMode] = useState<GameMode>("solve");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [highContrastEnabled, setHighContrastEnabled] = useState(false);
+  const [colorAssistEnabled, setColorAssistEnabled] = useState(false);
+  const [selectedPackId, setSelectedPackId] = useState(ALL_PACK_ID);
 
   const [solvePhase, setSolvePhase] = useState<SolvePhase>("landing");
   const [solveChallenge, setSolveChallenge] = useState<SolveChallenge>(() =>
@@ -93,6 +142,7 @@ export function App() {
   const [selectedDiaryEntryId, setSelectedDiaryEntryId] = useState<string | null>(null);
   const [diaryDraftTitle, setDiaryDraftTitle] = useState("");
   const [diaryDraftNote, setDiaryDraftNote] = useState("");
+  const [diaryImportError, setDiaryImportError] = useState<string | null>(null);
 
   const attemptColor = useMemo(() => getAttemptColorFromDrops(droppedPigments), [droppedPigments]);
   const attemptHex = attemptColor ? rgbToHex(attemptColor) : "#f0ebe0";
@@ -124,6 +174,57 @@ export function App() {
     [discriminateChallenge.contextVariant]
   );
 
+  const activeModeChallengeIds = useMemo(() => {
+    if (mode === "solve") {
+      return new Set(SOLVE_CHALLENGES.map((challenge) => challenge.id));
+    }
+
+    if (mode === "predict") {
+      return new Set(PREDICT_CHALLENGES.map((challenge) => challenge.id));
+    }
+
+    if (mode === "discriminate") {
+      return new Set(DISCRIMINATE_CHALLENGES.map((challenge) => challenge.id));
+    }
+
+    return new Set<string>();
+  }, [mode]);
+
+  const availablePackOptions = useMemo(() => {
+    if (mode === "collect") {
+      return [{ id: ALL_PACK_ID, title: "All Challenges" }];
+    }
+
+    const eligiblePacks = CONTENT_PACKS.filter((pack) =>
+      pack.challengeIds.some((challengeId) => activeModeChallengeIds.has(challengeId))
+    ).map((pack) => ({
+      id: pack.id,
+      title: pack.title
+    }));
+
+    return [{ id: ALL_PACK_ID, title: "All Challenges" }, ...eligiblePacks];
+  }, [activeModeChallengeIds, mode]);
+
+  const solveChallengePool = useMemo(
+    () => filterChallengePool(SOLVE_CHALLENGES, selectedPackId),
+    [selectedPackId]
+  );
+  const predictChallengePool = useMemo(
+    () => filterChallengePool(PREDICT_CHALLENGES, selectedPackId),
+    [selectedPackId]
+  );
+  const discriminateChallengePool = useMemo(
+    () => filterChallengePool(DISCRIMINATE_CHALLENGES, selectedPackId),
+    [selectedPackId]
+  );
+
+  const dailyDiaryPrompt = useMemo(() => getDailyDiaryPrompt(), []);
+  const selectedPackTitle = useMemo(
+    () =>
+      availablePackOptions.find((option) => option.id === selectedPackId)?.title ?? "All Challenges",
+    [availablePackOptions, selectedPackId]
+  );
+
   const visibleDiaryEntries = useMemo(
     () =>
       selectDiaryEntries(diaryEntries, {
@@ -153,6 +254,48 @@ export function App() {
       return visibleDiaryEntries[0]?.id ?? null;
     });
   }, [visibleDiaryEntries]);
+
+  useEffect(() => {
+    const availablePackIds = new Set(availablePackOptions.map((option) => option.id));
+
+    setSelectedPackId((current) => (availablePackIds.has(current) ? current : ALL_PACK_ID));
+  }, [availablePackOptions]);
+
+  useEffect(() => {
+    if (solveChallengePool.some((challenge) => challenge.id === solveChallenge.id)) {
+      return;
+    }
+
+    setSolveChallenge(selectNextChallenge(solveChallengePool));
+    setSolvePhase("landing");
+    setDroppedPigments([]);
+    setSolveResult(null);
+    setSolveSessionKey((previous) => previous + 1);
+  }, [solveChallengePool, solveChallenge.id]);
+
+  useEffect(() => {
+    if (predictChallengePool.some((challenge) => challenge.id === predictChallenge.id)) {
+      return;
+    }
+
+    setPredictChallenge(selectNextPredictChallenge(predictChallengePool));
+    setPredictPhase("landing");
+    setPredictSelectedOptionId(null);
+    setPredictResult(null);
+  }, [predictChallengePool, predictChallenge.id]);
+
+  useEffect(() => {
+    if (
+      discriminateChallengePool.some((challenge) => challenge.id === discriminateChallenge.id)
+    ) {
+      return;
+    }
+
+    setDiscriminateChallenge(selectNextDiscriminateChallenge(discriminateChallengePool));
+    setDiscriminatePhase("landing");
+    setDiscriminateSelectedOptionId(null);
+    setDiscriminateResult(null);
+  }, [discriminateChallengePool, discriminateChallenge.id]);
 
   useEffect(() => {
     if (mode !== "solve" || solvePhase !== "mixing") {
@@ -236,6 +379,8 @@ export function App() {
     }
 
     setSoundEnabled(readSoundEnabled(window.localStorage));
+    setHighContrastEnabled(readHighContrastEnabled(window.localStorage));
+    setColorAssistEnabled(readColorAssistEnabled(window.localStorage));
 
     const entries = readDiaryEntries(window.localStorage);
     setDiaryEntries(entries);
@@ -257,6 +402,22 @@ export function App() {
 
     writeSoundEnabled(soundEnabled, window.localStorage);
   }, [soundEnabled]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    writeHighContrastEnabled(highContrastEnabled, window.localStorage);
+  }, [highContrastEnabled]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    writeColorAssistEnabled(colorAssistEnabled, window.localStorage);
+  }, [colorAssistEnabled]);
 
   useEffect(() => {
     if (!selectedDiaryEntry) {
@@ -286,7 +447,7 @@ export function App() {
   };
 
   const cycleSolveChallenge = (nextPhase: SolvePhase) => {
-    setSolveChallenge((current) => selectNextChallenge(SOLVE_CHALLENGES, current.id));
+    setSolveChallenge((current) => selectNextChallenge(solveChallengePool, current.id));
     setDroppedPigments([]);
     setSolveResult(null);
     setSolvePhase(nextPhase);
@@ -314,7 +475,7 @@ export function App() {
   };
 
   const cyclePredictChallenge = (nextPhase: PredictPhase) => {
-    setPredictChallenge((current) => selectNextPredictChallenge(PREDICT_CHALLENGES, current.id));
+    setPredictChallenge((current) => selectNextPredictChallenge(predictChallengePool, current.id));
     setPredictSelectedOptionId(null);
     setPredictResult(null);
     setPredictPhase(nextPhase);
@@ -346,7 +507,7 @@ export function App() {
 
   const cycleDiscriminateChallenge = (nextPhase: DiscriminatePhase) => {
     setDiscriminateChallenge((current) =>
-      selectNextDiscriminateChallenge(DISCRIMINATE_CHALLENGES, current.id)
+      selectNextDiscriminateChallenge(discriminateChallengePool, current.id)
     );
     setDiscriminateSelectedOptionId(null);
     setDiscriminateResult(null);
@@ -393,6 +554,71 @@ export function App() {
 
       return next;
     });
+  };
+
+  const toggleHighContrast = () => {
+    setHighContrastEnabled((current) => !current);
+    playCue("tap");
+  };
+
+  const toggleColorAssist = () => {
+    setColorAssistEnabled((current) => !current);
+    playCue("tap");
+  };
+
+  const exportDiaryToJson = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const payload = serializeDiaryEntries(diaryEntries);
+    const blob = new Blob([payload], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = window.document.createElement("a");
+    const dateStamp = new Date().toISOString().slice(0, 10);
+
+    anchor.href = url;
+    anchor.download = `colormix-diary-${dateStamp}.json`;
+    anchor.click();
+
+    window.URL.revokeObjectURL(url);
+    playCue("save");
+  };
+
+  const importDiaryFromFile = async (file: File | null): Promise<void> => {
+    if (!file) {
+      return;
+    }
+
+    try {
+      const rawText = await file.text();
+      const importedEntries = parseDiaryEntries(rawText);
+
+      if (importedEntries.length === 0) {
+        throw new Error("No valid diary entries found in selected file.");
+      }
+
+      setDiaryEntries((current) => mergeDiaryEntries(current, importedEntries));
+      setSelectedDiaryEntryId(importedEntries[0]?.id ?? null);
+      setDiaryImportError(null);
+      playCue("save");
+    } catch (error) {
+      setDiaryImportError(
+        error instanceof Error ? error.message : "Unable to import diary file."
+      );
+      playCue("error");
+    }
+  };
+
+  const applyDailyPromptToDraft = () => {
+    if (!selectedDiaryEntry) {
+      return;
+    }
+
+    setDiaryDraftNote((current) =>
+      current.trim().length > 0 ? `${current.trim()}\n${dailyDiaryPrompt}` : dailyDiaryPrompt
+    );
+    playCue("tap");
   };
 
   const addDiaryEntry = (entry: DiaryEntry) => {
@@ -476,7 +702,7 @@ export function App() {
           : "Review and edit your saved swatches, formulas, and notes in a local-first color diary.";
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${highContrastEnabled ? "high-contrast" : ""}`}>
       <header className="hero">
         <p className="eyebrow">Color Mixing Game</p>
         <h1>
@@ -490,6 +716,7 @@ export function App() {
           Vertical Slice
         </h1>
         <p>{modeDescription}</p>
+        {mode !== "collect" && <p className="pack-note">Current pack: {selectedPackTitle}</p>}
 
         <div className="mode-switch" role="tablist" aria-label="Game mode switch">
           <button
@@ -531,6 +758,16 @@ export function App() {
         </div>
 
         <div className="polish-controls">
+          <label className="pack-select">
+            Pack
+            <select value={selectedPackId} onChange={(event) => setSelectedPackId(event.target.value)}>
+              {availablePackOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.title}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="button"
             className={`sound-toggle ${soundEnabled ? "active" : ""}`}
@@ -538,6 +775,14 @@ export function App() {
             aria-pressed={soundEnabled}
           >
             Sound: {soundEnabled ? "On" : "Off"}
+          </button>
+          <button
+            type="button"
+            className={`sound-toggle ${highContrastEnabled ? "active" : ""}`}
+            onClick={toggleHighContrast}
+            aria-pressed={highContrastEnabled}
+          >
+            High Contrast: {highContrastEnabled ? "On" : "Off"}
           </button>
           <p className="motion-note">Motion effects respect your system reduced-motion setting.</p>
         </div>
@@ -974,12 +1219,23 @@ export function App() {
           <aside className="intro-side">
             <h3>Context Variant</h3>
             <p>{discriminateContext.description}</p>
+            <button
+              type="button"
+              className={`sound-toggle ${colorAssistEnabled ? "active" : ""}`}
+              onClick={toggleColorAssist}
+              aria-pressed={colorAssistEnabled}
+            >
+              Color Assist: {colorAssistEnabled ? "On" : "Off"}
+            </button>
             <div className="context-preview" style={{ background: discriminateContext.frameBackground }}>
               <span
                 className="target-swatch large"
                 style={{ backgroundColor: discriminateChallenge.targetHex }}
               />
               <span>{discriminateChallenge.targetHex}</span>
+              {colorAssistEnabled && (
+                <span className="assist-chip">{formatAssistLabel(discriminateChallenge.target)}</span>
+              )}
             </div>
           </aside>
         </section>
@@ -1007,6 +1263,9 @@ export function App() {
                   style={{ backgroundColor: discriminateChallenge.targetHex }}
                 />
                 <span>{discriminateChallenge.targetHex}</span>
+                {colorAssistEnabled && (
+                  <span className="assist-chip">{formatAssistLabel(discriminateChallenge.target)}</span>
+                )}
               </div>
             </div>
 
@@ -1028,6 +1287,9 @@ export function App() {
                     <span className="option-token">Option {String.fromCharCode(65 + index)}</span>
                     <span className="target-swatch large" style={{ backgroundColor: option.hex }} />
                     <span>{option.hex}</span>
+                    {colorAssistEnabled && (
+                      <span className="assist-chip">{formatAssistLabel(option.color)}</span>
+                    )}
                   </button>
                 );
               })}
@@ -1074,11 +1336,22 @@ export function App() {
                   />
                 </div>
                 <span>{discriminateSelectedOption.hex}</span>
+                {colorAssistEnabled && (
+                  <span className="assist-chip">{formatAssistLabel(discriminateSelectedOption.color)}</span>
+                )}
               </div>
             ) : (
               <p className="hint">Select the swatch that exactly matches the target.</p>
             )}
             <p className="hint">{discriminateContext.description}</p>
+            <button
+              type="button"
+              className={`sound-toggle ${colorAssistEnabled ? "active" : ""}`}
+              onClick={toggleColorAssist}
+              aria-pressed={colorAssistEnabled}
+            >
+              Color Assist: {colorAssistEnabled ? "On" : "Off"}
+            </button>
           </aside>
         </section>
       )}
@@ -1117,6 +1390,9 @@ export function App() {
                 style={{ backgroundColor: discriminateChallenge.targetHex }}
               />
               <span>{discriminateChallenge.targetHex}</span>
+              {colorAssistEnabled && (
+                <span className="assist-chip">{formatAssistLabel(discriminateChallenge.target)}</span>
+              )}
             </div>
             <div className="swatch-card" style={{ background: discriminateContext.panelBackground }}>
               <span className="label">Your Pick</span>
@@ -1125,6 +1401,11 @@ export function App() {
                 style={{ backgroundColor: discriminateResult.selectedOption.hex }}
               />
               <span>{discriminateResult.selectedOption.hex}</span>
+              {colorAssistEnabled && (
+                <span className="assist-chip">
+                  {formatAssistLabel(discriminateResult.selectedOption.color)}
+                </span>
+              )}
             </div>
             <div className="swatch-card" style={{ background: discriminateContext.panelBackground }}>
               <span className="label">Correct Twin</span>
@@ -1133,6 +1414,11 @@ export function App() {
                 style={{ backgroundColor: discriminateResult.correctOption.hex }}
               />
               <span>{discriminateResult.correctOption.hex}</span>
+              {colorAssistEnabled && (
+                <span className="assist-chip">
+                  {formatAssistLabel(discriminateResult.correctOption.color)}
+                </span>
+              )}
             </div>
           </div>
 
@@ -1182,6 +1468,7 @@ export function App() {
           <div className="diary-main">
             <h2>Color Diary</h2>
             <p>Save and organize your favorite outcomes from Solve, Predict, and Find the Twin.</p>
+            <p className="diary-prompt">Daily Prompt: {dailyDiaryPrompt}</p>
 
             <div className="diary-toolbar">
               <label>
@@ -1218,6 +1505,27 @@ export function App() {
                 />
               </label>
             </div>
+
+            <div className="action-row">
+              <button type="button" className="button button-secondary" onClick={exportDiaryToJson}>
+                Export JSON
+              </button>
+              <label className="import-label">
+                Import JSON
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={async (event) => {
+                    const input = event.target;
+                    const file = input.files?.[0] ?? null;
+
+                    await importDiaryFromFile(file);
+                    input.value = "";
+                  }}
+                />
+              </label>
+            </div>
+            {diaryImportError && <p className="limit-warning">{diaryImportError}</p>}
 
             {visibleDiaryEntries.length === 0 ? (
               <p className="hint">
@@ -1289,6 +1597,9 @@ export function App() {
                 <p className="hint">{selectedDiaryEntry.summary}</p>
 
                 <div className="action-row">
+                  <button type="button" className="button button-secondary" onClick={applyDailyPromptToDraft}>
+                    Apply Daily Prompt
+                  </button>
                   <button type="button" className="button button-primary" onClick={saveDiaryDraft}>
                     Save Changes
                   </button>

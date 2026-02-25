@@ -39,6 +39,7 @@
 1. `pnpm` workspaces.
 2. `Turborepo` for build/test orchestration.
 3. Unified lint/format/test gates in CI.
+4. Content authoring template tooling in `@colormix/content` for challenge/pack scaffolding.
 
 ## 3. Proposed Repository Structure
 
@@ -49,9 +50,9 @@
 ├─ packages/
 │  ├─ color-engine/              # Mixing, color conversion, scoring
 │  ├─ game-domain/               # Level schema, progression, rewards
-│  ├─ mix-canvas/                # Pixi-based render + interaction system
+│  ├─ mix-canvas/                # Canvas interaction/render system
 │  ├─ ui/                        # Reusable design system components
-│  └─ content/                   # Challenge packs and validation scripts
+│  └─ content/                   # Challenge packs, validation, authoring templates
 ├─ docs/
 │  ├─ PRODUCT_SPEC.md
 │  ├─ ARCHITECTURE.md
@@ -175,14 +176,22 @@ Packaging runbook: `docs/IPAD_PACKAGING.md`.
 
 Cloud sync architecture: `docs/CLOUD_SYNC_ARCHITECTURE.md`.
 
-## 12. Security and Privacy Baseline
+## 12. Content Authoring Strategy
+
+1. Keep runtime content typed and validated through `@colormix/content`.
+2. Use template scaffolding to accelerate challenge/pack authoring while preserving schema consistency.
+3. Treat validation rules as release gates for new content.
+
+Authoring guide: `docs/CONTENT_AUTHORING.md`.
+
+## 13. Security and Privacy Baseline
 
 1. No ad/tracking SDKs in V1.
 2. Store only necessary local user data.
 3. Avoid collecting personal identifiers by default.
 4. Keep all telemetry first-party and documented.
 
-## 13. ADR Process
+## 14. ADR Process
 
 Any non-trivial technical decision should be logged as an Architecture Decision Record:
 

@@ -220,6 +220,21 @@ export const DEFAULT_GAME_CONTENT = {
         "storm-lilac",
         "predict-river-stone"
       ]
+    },
+    {
+      id: "full-spectrum-lab",
+      title: "Full Spectrum Lab (All Modes)",
+      challengeIds: [
+        "sunset-peach",
+        "predict-coral-flare",
+        "twin-coral-sunset",
+        "moss-field",
+        "predict-moss-mint",
+        "twin-sage-field",
+        "storm-lilac",
+        "predict-river-stone",
+        "twin-lilac-mist"
+      ]
     }
   ]
 } as const satisfies GameContentDefinition;

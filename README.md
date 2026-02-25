@@ -64,11 +64,15 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 10. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
 11. Curated starter pack balancing: challenge difficulty tiers (`easy`/`medium`/`hard`) and validation rules for progression, mode mix, and perceptual distractor spacing.
 12. Sound and motion polish baseline: subtle Web Audio cues with user toggle + reduced-motion-safe transitions.
-13. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest, Playwright.
-14. Baseline E2E coverage: mode switching and diary save/edit/delete flow.
-15. Optional iPad packaging track scaffolded with Capacitor config/scripts and runbook.
-16. Optional cloud sync architecture contracts in `@colormix/game-domain` + dedicated architecture doc.
-17. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
+13. Accessibility controls: persisted high-contrast mode and discriminate color-assist overlays.
+14. Color Diary retention upgrades: daily prompts plus JSON import/export with merge-safe ingestion.
+15. Content depth upgrade: second curated pack (`full-spectrum-lab`) and pack-aware challenge filtering in app.
+16. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest, Playwright.
+17. Baseline E2E coverage: mode switching, diary flow, and pack/accessibility controls.
+18. Optional iPad packaging track scaffolded with Capacitor config/scripts and runbook.
+19. Optional cloud sync architecture contracts in `@colormix/game-domain` + dedicated architecture doc.
+20. Content authoring toolkit: challenge/pack template APIs and CLI scaffolding in `@colormix/content`.
+21. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
 
 ## Repository Layout
 
@@ -116,6 +120,7 @@ The web app runs from `apps/web` through the monorepo `dev` task.
 9. `pnpm run test:e2e` - run Playwright Chromium baseline end-to-end flows.
 10. `pnpm run ios:prepare` - build web assets and sync into Capacitor iOS shell.
 11. `pnpm run ios:open` - open the iOS project in Xcode after sync.
+12. `pnpm --filter @colormix/content run authoring:template -- --kind challenge --mode solve --id my-id` - scaffold content templates.
 
 ## Delivery Plan
 
@@ -150,6 +155,7 @@ Backlog source of truth: [`docs/BACKLOG.md`](docs/BACKLOG.md).
 7. Architecture decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 8. iPad packaging runbook: [`docs/IPAD_PACKAGING.md`](docs/IPAD_PACKAGING.md)
 9. Cloud sync architecture: [`docs/CLOUD_SYNC_ARCHITECTURE.md`](docs/CLOUD_SYNC_ARCHITECTURE.md)
+10. Content authoring toolkit: [`docs/CONTENT_AUTHORING.md`](docs/CONTENT_AUTHORING.md)
 
 ## Current Status
 
@@ -162,9 +168,10 @@ Current repository state:
 5. `color-engine` now includes perceptual color scoring via `DeltaE00` and calibrated quality bands.
 6. Solve, Predict, Find the Twin, and Color Diary mode vertical slices are implemented in `apps/web`.
 7. Challenge content schema and validation pipeline are implemented in `@colormix/content` and wired into CI.
-8. First curated starter challenge pack + balancing pass is implemented in `@colormix/content`.
-9. Sound/motion polish and baseline E2E coverage are complete for M4 hardening.
+8. Two curated challenge packs and pack-aware challenge filtering are implemented.
+9. Sound/motion polish, accessibility controls, diary portability, and baseline E2E hardening are complete for M4.
 10. Optional iPad packaging and optional cloud-sync architecture tracks are scaffolded for post-V1 rollout.
+11. Content authoring toolkit baseline is available for scalable challenge/pack creation.
 
 ## Source Notes
 

@@ -1,4 +1,6 @@
 export const SOUND_ENABLED_STORAGE_KEY = "colormix.sound.enabled.v1";
+export const HIGH_CONTRAST_STORAGE_KEY = "colormix.contrast.enabled.v1";
+export const COLOR_ASSIST_STORAGE_KEY = "colormix.colorassist.enabled.v1";
 
 type StorageLike = Pick<Storage, "getItem" | "setItem">;
 
@@ -102,6 +104,21 @@ class WebAudioSoundPlayer implements UiSoundPlayer {
 }
 
 export function parseSoundEnabled(rawValue: string | null | undefined): boolean {
+  return parseBooleanPreference(rawValue, true);
+}
+
+export function parseHighContrastEnabled(rawValue: string | null | undefined): boolean {
+  return parseBooleanPreference(rawValue, false);
+}
+
+export function parseColorAssistEnabled(rawValue: string | null | undefined): boolean {
+  return parseBooleanPreference(rawValue, false);
+}
+
+function parseBooleanPreference(
+  rawValue: string | null | undefined,
+  fallback: boolean
+): boolean {
   if (rawValue === "0" || rawValue === "false") {
     return false;
   }
@@ -110,7 +127,7 @@ export function parseSoundEnabled(rawValue: string | null | undefined): boolean 
     return true;
   }
 
-  return true;
+  return fallback;
 }
 
 export function readSoundEnabled(storage: StorageLike | null | undefined): boolean {
@@ -130,6 +147,44 @@ export function writeSoundEnabled(
   }
 
   storage.setItem(SOUND_ENABLED_STORAGE_KEY, enabled ? "1" : "0");
+}
+
+export function readHighContrastEnabled(storage: StorageLike | null | undefined): boolean {
+  if (!storage) {
+    return false;
+  }
+
+  return parseHighContrastEnabled(storage.getItem(HIGH_CONTRAST_STORAGE_KEY));
+}
+
+export function writeHighContrastEnabled(
+  enabled: boolean,
+  storage: StorageLike | null | undefined
+): void {
+  if (!storage) {
+    return;
+  }
+
+  storage.setItem(HIGH_CONTRAST_STORAGE_KEY, enabled ? "1" : "0");
+}
+
+export function readColorAssistEnabled(storage: StorageLike | null | undefined): boolean {
+  if (!storage) {
+    return false;
+  }
+
+  return parseColorAssistEnabled(storage.getItem(COLOR_ASSIST_STORAGE_KEY));
+}
+
+export function writeColorAssistEnabled(
+  enabled: boolean,
+  storage: StorageLike | null | undefined
+): void {
+  if (!storage) {
+    return;
+  }
+
+  storage.setItem(COLOR_ASSIST_STORAGE_KEY, enabled ? "1" : "0");
 }
 
 export function createUiSoundPlayer(): UiSoundPlayer {

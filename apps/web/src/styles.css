@@ -121,6 +121,28 @@ code {
   align-items: center;
 }
 
+.pack-note {
+  margin-top: 0.45rem;
+  color: #5b6170;
+  font-size: 0.86rem;
+}
+
+.pack-select {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: #556070;
+}
+
+.pack-select select {
+  border: 1px solid #d5ccbd;
+  border-radius: 999px;
+  padding: 0.36rem 0.7rem;
+  background: #ffffff;
+  color: #2f3a4f;
+  font: inherit;
+}
+
 .sound-toggle {
   border: 1px solid #d5ccbd;
   border-radius: 999px;
@@ -146,6 +168,16 @@ code {
   margin: 0;
   color: #616979;
   font-size: 0.83rem;
+}
+
+.assist-chip {
+  border-radius: 999px;
+  border: 1px solid #dad1c1;
+  background: #f7f3ea;
+  color: #414855;
+  font-size: 0.73rem;
+  padding: 0.2rem 0.45rem;
+  letter-spacing: 0.03em;
 }
 
 .board-intro {
@@ -372,6 +404,16 @@ code {
   align-content: start;
 }
 
+.diary-prompt {
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid #dfd4c2;
+  background: #fbf5e8;
+  color: #4b4e59;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.88rem;
+}
+
 .diary-side {
   display: grid;
   gap: 0.65rem;
@@ -394,6 +436,20 @@ code {
   gap: 0.35rem;
   font-size: 0.8rem;
   color: #555c69;
+}
+
+.import-label {
+  border: 1px dashed #cdc2ae;
+  border-radius: 999px;
+  padding: 0.42rem 0.72rem;
+  color: #3f4654;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.import-label input {
+  display: none;
 }
 
 .diary-toolbar select,
@@ -570,6 +626,40 @@ code {
   margin-top: 0.35rem;
   font-size: 1.3rem;
   font-weight: 650;
+}
+
+.app-shell.high-contrast .hero,
+.app-shell.high-contrast .board {
+  border-color: #0d1116;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.app-shell.high-contrast .mode-switch {
+  background: #d9dde6;
+}
+
+.app-shell.high-contrast .mode-button {
+  color: #142033;
+}
+
+.app-shell.high-contrast .mode-button.active {
+  background: #091a2d;
+}
+
+.app-shell.high-contrast .button-primary,
+.app-shell.high-contrast .button-secondary {
+  background: #101820;
+  color: #ffffff;
+}
+
+.app-shell.high-contrast .button-ghost {
+  background: #d5dce8;
+  color: #101820;
+}
+
+.app-shell.high-contrast .target-swatch {
+  border-color: rgba(0, 0, 0, 0.7);
 }
 
 @keyframes surface-enter {

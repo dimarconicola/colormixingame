@@ -59,4 +59,16 @@ test.describe("mode switching and color diary", () => {
     ).toBeVisible();
     await expect(page.getByText("Select a diary card to edit title and notes.")).toBeVisible();
   });
+
+  test("supports pack filtering and accessibility toggles", async ({ page }) => {
+    await page.getByLabel("Pack").selectOption({ label: "Starter Essentials (Curated Path)" });
+    await expect(page.getByText(/Current pack: Starter Essentials/i)).toBeVisible();
+
+    await page.getByRole("button", { name: /High Contrast: Off/i }).click();
+    await expect(page.locator("main.app-shell")).toHaveClass(/high-contrast/);
+
+    await page.getByRole("tab", { name: "Find the Twin" }).click();
+    await page.getByRole("button", { name: /Color Assist: Off/i }).first().click();
+    await expect(page.locator(".assist-chip").first()).toBeVisible();
+  });
 });

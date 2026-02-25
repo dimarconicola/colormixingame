@@ -11,9 +11,11 @@ This plan is intentionally detailed on architecture and quality, while keeping f
 ## 1.1 Current Snapshot (2026-02-25)
 
 1. M0-M3 core scope is functionally in place with four playable mode vertical slices (`Solve`, `Predict`, `Discriminate`, `Collect`).
-2. M4 quality hardening baseline is complete with `B-012` (sound/motion polish) and `B-015` (baseline end-to-end coverage).
-3. M5 optional packaging is scaffolded with Capacitor config/scripts and a runbook (`B-013`).
-4. Optional post-V1 cloud sync architecture is defined with deterministic merge contracts (`B-014`).
+2. M4 quality hardening is expanded and complete with sound/motion polish, accessibility controls, diary import/export, daily prompts, and baseline E2E coverage (`B-012`, `B-015`, `B-016`, `B-017`).
+3. Content depth target is met with two curated packs and pack-aware in-app selection (`B-018`).
+4. Content authoring tooling baseline is now available via `@colormix/content` template APIs and CLI scaffolding (`B-019`).
+5. M5 optional packaging is scaffolded with Capacitor config/scripts and a runbook (`B-013`), pending local CocoaPods/Xcode bootstrap.
+6. Optional post-V1 cloud sync architecture is defined with deterministic merge contracts (`B-014`).
 
 ## 2. Release Strategy
 

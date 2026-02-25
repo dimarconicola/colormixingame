@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  COLOR_ASSIST_STORAGE_KEY,
+  HIGH_CONTRAST_STORAGE_KEY,
   SOUND_ENABLED_STORAGE_KEY,
+  parseColorAssistEnabled,
+  parseHighContrastEnabled,
   parseSoundEnabled,
+  readColorAssistEnabled,
+  readHighContrastEnabled,
   readSoundEnabled,
+  writeColorAssistEnabled,
+  writeHighContrastEnabled,
   writeSoundEnabled
 } from "./polish";
 
@@ -50,6 +58,20 @@ describe("parseSoundEnabled", () => {
   });
 });
 
+describe("parse contrast and assist preferences", () => {
+  it("defaults to disabled for unknown values", () => {
+    expect(parseHighContrastEnabled("unknown")).toBe(false);
+    expect(parseColorAssistEnabled("unknown")).toBe(false);
+  });
+
+  it("accepts explicit true/false values", () => {
+    expect(parseHighContrastEnabled("1")).toBe(true);
+    expect(parseHighContrastEnabled("0")).toBe(false);
+    expect(parseColorAssistEnabled("true")).toBe(true);
+    expect(parseColorAssistEnabled("false")).toBe(false);
+  });
+});
+
 describe("sound preference storage", () => {
   it("reads from storage and defaults to enabled", () => {
     expect(readSoundEnabled(createStorageStub("1"))).toBe(true);
@@ -66,5 +88,16 @@ describe("sound preference storage", () => {
 
     writeSoundEnabled(true, storage);
     expect(storage.getItem(SOUND_ENABLED_STORAGE_KEY)).toBe("1");
+  });
+
+  it("reads and writes high contrast + color assist values", () => {
+    const storage = createStorageStub();
+
+    writeHighContrastEnabled(true, storage);
+    writeColorAssistEnabled(true, storage);
+    expect(storage.getItem(HIGH_CONTRAST_STORAGE_KEY)).toBe("1");
+    expect(storage.getItem(COLOR_ASSIST_STORAGE_KEY)).toBe("1");
+    expect(readHighContrastEnabled(storage)).toBe(true);
+    expect(readColorAssistEnabled(storage)).toBe(true);
   });
 });

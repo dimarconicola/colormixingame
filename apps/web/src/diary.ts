@@ -111,6 +111,10 @@ export function writeDiaryEntries(
   storage.setItem(DIARY_STORAGE_KEY, JSON.stringify(entries));
 }
 
+export function serializeDiaryEntries(entries: readonly DiaryEntry[]): string {
+  return JSON.stringify(entries, null, 2);
+}
+
 export function createDiaryEntryFromSolve(params: {
   challenge: SolveChallenge;
   droppedPigments: readonly SolvePigmentId[];
@@ -197,6 +201,49 @@ export function updateDiaryEntry(
 
 export function removeDiaryEntry(entries: readonly DiaryEntry[], entryId: string): DiaryEntry[] {
   return entries.filter((entry) => entry.id !== entryId);
+}
+
+export function mergeDiaryEntries(
+  existingEntries: readonly DiaryEntry[],
+  incomingEntries: readonly DiaryEntry[]
+): DiaryEntry[] {
+  const byId = new Map<string, DiaryEntry>();
+
+  for (const entry of existingEntries) {
+    byId.set(entry.id, entry);
+  }
+
+  for (const entry of incomingEntries) {
+    const current = byId.get(entry.id);
+
+    if (!current || current.updatedAt.localeCompare(entry.updatedAt) < 0) {
+      byId.set(entry.id, entry);
+    }
+  }
+
+  return [...byId.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+}
+
+const DAILY_PROMPTS = [
+  "Capture a swatch that feels like morning light.",
+  "Save a color that could be a forest shadow.",
+  "Find a mix that looks like vintage paper.",
+  "Create a calm palette and note what makes it feel balanced.",
+  "Try a warm-cool contrast and save your favorite result.",
+  "Record a neutral color that still feels expressive.",
+  "Build a color inspired by your favorite fruit."
+] as const;
+
+function dayOfYearUtc(date: Date): number {
+  const startOfYearUtc = Date.UTC(date.getUTCFullYear(), 0, 1);
+  const dateUtc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+
+  return Math.floor((dateUtc - startOfYearUtc) / 86_400_000);
+}
+
+export function getDailyDiaryPrompt(date: Date = new Date()): string {
+  const index = dayOfYearUtc(date) % DAILY_PROMPTS.length;
+  return DAILY_PROMPTS[index] ?? DAILY_PROMPTS[0];
 }
 
 export function selectDiaryEntries(

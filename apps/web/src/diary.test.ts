@@ -3,9 +3,12 @@ import {
   createDiaryEntryFromDiscriminate,
   createDiaryEntryFromPredict,
   createDiaryEntryFromSolve,
+  getDailyDiaryPrompt,
+  mergeDiaryEntries,
   parseDiaryEntries,
   prependDiaryEntry,
   removeDiaryEntry,
+  serializeDiaryEntries,
   selectDiaryEntries,
   updateDiaryEntry,
   type DiaryEntry
@@ -161,5 +164,46 @@ describe("diary list operations", () => {
 
     expect(visible).toHaveLength(1);
     expect(visible[0]?.id).toBe("e2");
+  });
+
+  it("merges imported entries and keeps latest updates by id", () => {
+    const incoming: DiaryEntry[] = [
+      {
+        id: "e2",
+        sourceMode: "predict",
+        challengeId: "c2",
+        title: "Coral prediction updated",
+        note: "latest",
+        swatchHex: "#dd8877",
+        summary: "predict summary updated",
+        createdAt: "2026-01-03T10:00:00.000Z",
+        updatedAt: "2026-01-03T12:00:00.000Z"
+      },
+      {
+        id: "e3",
+        sourceMode: "discriminate",
+        challengeId: "c3",
+        title: "Twin capture",
+        note: "",
+        swatchHex: "#aabbcc",
+        summary: "discriminate summary",
+        createdAt: "2026-01-04T10:00:00.000Z",
+        updatedAt: "2026-01-04T10:00:00.000Z"
+      }
+    ];
+
+    const merged = mergeDiaryEntries(baseEntries, incoming);
+
+    expect(merged).toHaveLength(3);
+    expect(merged.find((entry) => entry.id === "e2")?.title).toBe("Coral prediction updated");
+    expect(serializeDiaryEntries(merged)).toContain("Twin capture");
+  });
+
+  it("returns deterministic daily prompt by date", () => {
+    const promptA = getDailyDiaryPrompt(new Date("2026-03-01T12:00:00.000Z"));
+    const promptB = getDailyDiaryPrompt(new Date("2026-03-01T23:59:59.000Z"));
+
+    expect(promptA).toBe(promptB);
+    expect(promptA.length).toBeGreaterThan(10);
   });
 });

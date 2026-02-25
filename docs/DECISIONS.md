@@ -130,3 +130,30 @@ Template:
 - Decision: Define deterministic sync envelope contracts and merge policy in `@colormix/game-domain` (`cloud-sync.ts`) and pair them with a dedicated architecture document (`docs/CLOUD_SYNC_ARCHITECTURE.md`).
 - Alternatives considered: postpone sync architecture until backend implementation starts; define contracts only in docs without executable domain utilities.
 - Consequences: clearer path for post-V1 cross-device continuity with testable merge behavior; implementation still requires queue storage, backend endpoints, and auth rollout in later phases.
+
+## ADR-014
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-016 targeted accessibility gaps called out in product requirements, especially high-contrast readability and non-color-only cues in discrimination gameplay.
+- Decision: Add persisted accessibility controls in the web app: high-contrast UI mode and a color-assist overlay that shows RGB labels for discriminate target/options/results.
+- Alternatives considered: keep accessibility as a docs-only future task; add assist labels only in results, not active selection flow.
+- Consequences: immediate accessibility uplift with low architectural risk; small UI complexity increase and additional preference persistence paths.
+
+## ADR-015
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-017/B-018 aimed to improve retention and content depth without introducing backend dependencies.
+- Decision: Add daily diary prompts plus diary JSON import/export/merge flow, and expand curated content with a second pack (`full-spectrum-lab`) plus in-app pack selection that filters challenge pools by mode.
+- Alternatives considered: keep single-pack random challenge rotation; defer diary portability until cloud sync implementation.
+- Consequences: richer replay loops and better player agency over challenge progression; requires stronger UI-state synchronization and additional regression coverage.
+
+## ADR-016
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: Backlog explicitly retained a content authoring/editor tooling gap as content volume grows.
+- Decision: Implement authoring tooling in `@colormix/content` as reusable template APIs plus a CLI (`authoring:template`) for challenge/pack scaffolding.
+- Alternatives considered: hand-edit content only; build a full graphical editor immediately.
+- Consequences: faster and more consistent content creation today with minimal maintenance overhead; full visual editor remains optional for future scale.
