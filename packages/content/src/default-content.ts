@@ -34,6 +34,7 @@ export const DEFAULT_GAME_CONTENT = {
       id: "sunset-peach",
       title: "Sunset Peach",
       brief: "Match a warm pastel by balancing red, yellow, and white.",
+      difficulty: "easy",
       maxDrops: 8,
       palette: ["cadmium-red", "hansa-yellow", "titanium-white", "mars-black"],
       referenceRecipe: [
@@ -46,6 +47,7 @@ export const DEFAULT_GAME_CONTENT = {
       id: "storm-lilac",
       title: "Storm Lilac",
       brief: "Build a cool violet-grey with subtle dark neutralization.",
+      difficulty: "hard",
       maxDrops: 9,
       palette: ["cadmium-red", "ultramarine", "titanium-white", "mars-black"],
       referenceRecipe: [
@@ -59,6 +61,7 @@ export const DEFAULT_GAME_CONTENT = {
       id: "moss-field",
       title: "Moss Field",
       brief: "Reach a muted natural green using yellow, blue, and black.",
+      difficulty: "medium",
       maxDrops: 8,
       palette: ["hansa-yellow", "ultramarine", "titanium-white", "mars-black"],
       referenceRecipe: [
@@ -73,6 +76,7 @@ export const DEFAULT_GAME_CONTENT = {
       id: "predict-coral-flare",
       title: "Coral Flare",
       brief: "Pick the resulting swatch for this warm coral recipe.",
+      difficulty: "easy",
       formula: [
         { pigmentId: "cadmium-red", drops: 2 },
         { pigmentId: "hansa-yellow", drops: 1 },
@@ -101,6 +105,7 @@ export const DEFAULT_GAME_CONTENT = {
       id: "predict-river-stone",
       title: "River Stone",
       brief: "Predict a muted cool neutral from the listed formula.",
+      difficulty: "hard",
       formula: [
         { pigmentId: "ultramarine", drops: 2 },
         { pigmentId: "titanium-white", drops: 3 },
@@ -129,6 +134,7 @@ export const DEFAULT_GAME_CONTENT = {
       id: "predict-moss-mint",
       title: "Moss Mint",
       brief: "Estimate the green output when yellow and blue are cooled and softened.",
+      difficulty: "medium",
       formula: [
         { pigmentId: "hansa-yellow", drops: 2 },
         { pigmentId: "ultramarine", drops: 1 },
@@ -158,14 +164,14 @@ export const DEFAULT_GAME_CONTENT = {
   packs: [
     {
       id: "starter-essentials",
-      title: "Starter Essentials",
+      title: "Starter Essentials (Curated Path)",
       challengeIds: [
         "sunset-peach",
-        "storm-lilac",
-        "moss-field",
         "predict-coral-flare",
-        "predict-river-stone",
-        "predict-moss-mint"
+        "moss-field",
+        "predict-moss-mint",
+        "storm-lilac",
+        "predict-river-stone"
       ]
     }
   ]

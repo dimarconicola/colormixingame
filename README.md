@@ -60,8 +60,9 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 6. Solve mode vertical slice in `apps/web`: challenge lobby, active mix flow, and scored result screen.
 7. Predict mode vertical slice in `apps/web`: formula-driven multiple-choice round and scored results.
 8. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
-9. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-10. CI: GitHub Actions pipeline for lint/typecheck/test/content validation/build.
+9. Curated starter pack balancing: challenge difficulty tiers (`easy`/`medium`/`hard`) and validation rules for progression, mode mix, and perceptual distractor spacing.
+10. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
+11. CI: GitHub Actions pipeline for lint/typecheck/test/content validation/build.
 
 ## Repository Layout
 
@@ -150,7 +151,8 @@ Current repository state:
 5. `color-engine` now includes perceptual color scoring via `DeltaE00` and calibrated quality bands.
 6. Solve and Predict mode vertical slices are implemented in `apps/web`.
 7. Challenge content schema and validation pipeline are implemented in `@colormix/content` and wired into CI.
-8. Next implementation focus is curated challenge pack balancing and Find the Twin mode.
+8. First curated starter challenge pack + balancing pass is implemented in `@colormix/content`.
+9. Next implementation focus is Find the Twin mode.
 
 ## Source Notes
 

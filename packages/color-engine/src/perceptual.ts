@@ -1,4 +1,4 @@
-import type { RgbColor } from "./types";
+import type { RgbColor } from "./types.js";
 
 export type LabColor = {
   l: number;

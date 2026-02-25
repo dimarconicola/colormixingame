@@ -67,3 +67,12 @@ Template:
 - Decision: Centralize challenge definitions in `@colormix/content` with explicit schema types, default content payload, validation utilities, and a CLI validation script enforced in CI.
 - Alternatives considered: keep inline mode-local content definitions; introduce JSON-only content files without runtime validation utilities.
 - Consequences: stronger content integrity and easier scaling for future packs; requires ESM-safe module import conventions and keeping validation rules aligned with gameplay constraints.
+
+## ADR-007
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-009 required a curated starter pack with a defensible difficulty curve, not just a list of challenge IDs.
+- Decision: Add explicit challenge difficulty tiers (`easy`, `medium`, `hard`) and enforce pack-balance constraints in content validation: non-decreasing difficulty order, solve/predict mode mix, starter-tier coverage targets, and perceptual distractor separation checks for predict challenges.
+- Alternatives considered: manual difficulty labels without validation; validating only challenge existence/duplicates inside packs.
+- Consequences: more reliable progression quality as content grows, with measurable balancing guardrails; future pack authoring must satisfy these constraints or tune rule bands intentionally.

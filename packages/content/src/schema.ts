@@ -15,10 +15,13 @@ export type FormulaEntryDefinition = {
   drops: number;
 };
 
+export type ChallengeDifficulty = "easy" | "medium" | "hard";
+
 export type SolveChallengeDefinition = {
   id: string;
   title: string;
   brief: string;
+  difficulty: ChallengeDifficulty;
   maxDrops: number;
   palette: readonly string[];
   referenceRecipe: readonly FormulaEntryDefinition[];
@@ -28,6 +31,7 @@ export type PredictChallengeDefinition = {
   id: string;
   title: string;
   brief: string;
+  difficulty: ChallengeDifficulty;
   formula: readonly FormulaEntryDefinition[];
   distractors: readonly (readonly FormulaEntryDefinition[])[];
   correctOptionSlot: number;

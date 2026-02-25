@@ -42,4 +42,29 @@ describe("validateGameContent", () => {
 
     expect(issues.some((issue) => issue.message.includes("duplicate formulas"))).toBe(true);
   });
+
+  it("reports non-monotonic difficulty progression in packs", () => {
+    const invalidContent = {
+      ...DEFAULT_GAME_CONTENT,
+      packs: [
+        {
+          ...DEFAULT_GAME_CONTENT.packs?.[0],
+          challengeIds: [
+            "storm-lilac",
+            "sunset-peach",
+            "predict-coral-flare",
+            "moss-field",
+            "predict-moss-mint",
+            "predict-river-stone"
+          ]
+        }
+      ]
+    };
+
+    const issues = validateGameContent(invalidContent);
+
+    expect(
+      issues.some((issue) => issue.message.includes("difficulty progression must be non-decreasing"))
+    ).toBe(true);
+  });
 });

@@ -12,5 +12,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "validate": "pnpm run build && node dist/cli-validate.js"
+  },
+  "dependencies": {
+    "@colormix/color-engine": "workspace:*"
   }
 }

@@ -69,7 +69,11 @@ importers:
 
   packages/color-engine: {}
 
-  packages/content: {}
+  packages/content:
+    dependencies:
+      '@colormix/color-engine':
+        specifier: workspace:*
+        version: link:../color-engine
 
   packages/game-domain: {}
 
