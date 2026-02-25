@@ -55,8 +55,9 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 1. Monorepo: `pnpm` workspaces + `Turborepo` task graph.
 2. App shell: `React + Vite + TypeScript` under `apps/web`.
 3. Package boundaries: `color-engine`, `game-domain`, `mix-canvas`, `ui`, `content`.
-4. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-5. CI: GitHub Actions pipeline for lint/typecheck/test/build.
+4. `mix-canvas` pointer interaction baseline: drag pigments into a bowl with callback events.
+5. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
+6. CI: GitHub Actions pipeline for lint/typecheck/test/build.
 
 ## Repository Layout
 
@@ -140,7 +141,8 @@ Current repository state:
 1. Product and architecture documentation baseline is established.
 2. Monorepo scaffold and CI baseline are implemented.
 3. Initial web app shell and shared package skeletons are implemented.
-4. Next implementation focus is tactile interaction depth in `mix-canvas` and perceptual scoring calibration.
+4. `mix-canvas` now supports pointer-driven drag/drop with bowl drop events and a live demo in `apps/web`.
+5. Next implementation focus is perceptual scoring calibration and Solve mode vertical slice.
 
 ## Source Notes
 
@@ -154,4 +156,3 @@ Original brainstorming/reference docs retained in repository root:
 1. Any architecture/product decision must be reflected in docs before or with code changes.
 2. `README.md` and `docs/BACKLOG.md` must be updated in the same PR for material scope changes.
 3. Do not add features that bypass quality gates for short-term speed.
-
