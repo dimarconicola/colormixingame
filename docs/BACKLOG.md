@@ -23,10 +23,8 @@ Status values:
 
 ## 3. NEXT
 
-1. `B-011` Implement Color Diary with save/edit/collection wall.
-2. `B-012` Add sound and motion polish pass.
-3. `B-013` Build optional iPad packaging track using Capacitor.
-4. `B-014` Define optional cloud sync architecture (post-V1 only).
+1. `B-013` Build optional iPad packaging track using Capacitor.
+2. `B-014` Define optional cloud sync architecture (post-V1 only).
 
 ## 4. LATER
 
