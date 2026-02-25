@@ -58,3 +58,12 @@ Template:
 - Decision: Introduce a shared `selectNextById` challenge-runner utility and use it in both mode modules (`solve.ts`, `predict.ts`) instead of mode-specific duplicated selection logic.
 - Alternatives considered: independent per-mode `selectNextChallenge` implementations.
 - Consequences: lower duplication, consistent behavior across modes, and a clearer foundation for future mode additions.
+
+## ADR-006
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: Mode content was embedded directly in app modules, which made balancing, validation, and CI integrity checks harder as content volume grows.
+- Decision: Centralize challenge definitions in `@colormix/content` with explicit schema types, default content payload, validation utilities, and a CLI validation script enforced in CI.
+- Alternatives considered: keep inline mode-local content definitions; introduce JSON-only content files without runtime validation utilities.
+- Consequences: stronger content integrity and easier scaling for future packs; requires ESM-safe module import conventions and keeping validation rules aligned with gameplay constraints.

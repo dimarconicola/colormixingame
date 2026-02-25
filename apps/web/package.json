@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@colormix/color-engine": "workspace:*",
+    "@colormix/content": "workspace:*",
     "@colormix/mix-canvas": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

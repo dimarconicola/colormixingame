@@ -37,5 +37,8 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Validate Content
+        run: pnpm content:validate
+
       - name: Build
         run: pnpm build

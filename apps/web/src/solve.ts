@@ -1,3 +1,4 @@
+import { DEFAULT_GAME_CONTENT } from "@colormix/content";
 import {
   mixWeightedRgb,
   rgbToHex,
@@ -9,39 +10,9 @@ import {
 import type { MixCanvasPigmentInput } from "@colormix/mix-canvas";
 import { selectNextById } from "./challenge-runner";
 
-export type SolvePigment = {
-  id: string;
-  label: string;
-  rgb: RgbColor;
-};
+export type SolvePigment = (typeof DEFAULT_GAME_CONTENT.pigments)[number];
 
-export const SOLVE_PIGMENTS = [
-  {
-    id: "cadmium-red",
-    label: "Cadmium Red",
-    rgb: { r: 255, g: 76, b: 58 }
-  },
-  {
-    id: "hansa-yellow",
-    label: "Hansa Yellow",
-    rgb: { r: 255, g: 204, b: 51 }
-  },
-  {
-    id: "ultramarine",
-    label: "Ultramarine",
-    rgb: { r: 62, g: 102, b: 255 }
-  },
-  {
-    id: "titanium-white",
-    label: "Titanium White",
-    rgb: { r: 245, g: 245, b: 245 }
-  },
-  {
-    id: "mars-black",
-    label: "Mars Black",
-    rgb: { r: 32, g: 34, b: 38 }
-  }
-] as const satisfies readonly SolvePigment[];
+export const SOLVE_PIGMENTS = DEFAULT_GAME_CONTENT.pigments;
 
 export type SolvePigmentId = (typeof SOLVE_PIGMENTS)[number]["id"];
 
@@ -63,11 +34,15 @@ export type SolveChallenge = {
 
 const PIGMENT_INDEX = Object.fromEntries(
   SOLVE_PIGMENTS.map((pigment) => [pigment.id, pigment])
-) as Record<SolvePigmentId, (typeof SOLVE_PIGMENTS)[number]>;
+) as Record<SolvePigmentId, SolvePigment>;
 
 const PIGMENT_ID_SET = new Set<SolvePigmentId>(SOLVE_PIGMENTS.map((pigment) => pigment.id));
 
-function createChallenge(definition: Omit<SolveChallenge, "target" | "targetHex">): SolveChallenge {
+type SolveChallengeDefinition = Omit<SolveChallenge, "target" | "targetHex">;
+
+type SolveChallengeSource = (typeof DEFAULT_GAME_CONTENT.solveChallenges)[number];
+
+function createChallenge(definition: SolveChallengeDefinition): SolveChallenge {
   const recipeInputs: WeightedColorInput[] = definition.referenceRecipe.map((recipe) => ({
     color: PIGMENT_INDEX[recipe.pigmentId].rgb,
     weight: recipe.drops
@@ -82,51 +57,41 @@ function createChallenge(definition: Omit<SolveChallenge, "target" | "targetHex"
   };
 }
 
-export const SOLVE_CHALLENGES: readonly SolveChallenge[] = [
-  createChallenge({
-    id: "sunset-peach",
-    title: "Sunset Peach",
-    brief: "Match a warm pastel by balancing red, yellow, and white.",
-    maxDrops: 8,
-    palette: ["cadmium-red", "hansa-yellow", "titanium-white", "mars-black"],
-    referenceRecipe: [
-      { pigmentId: "cadmium-red", drops: 2 },
-      { pigmentId: "hansa-yellow", drops: 2 },
-      { pigmentId: "titanium-white", drops: 3 }
-    ]
-  }),
-  createChallenge({
-    id: "storm-lilac",
-    title: "Storm Lilac",
-    brief: "Build a cool violet-grey with subtle dark neutralization.",
-    maxDrops: 9,
-    palette: ["cadmium-red", "ultramarine", "titanium-white", "mars-black"],
-    referenceRecipe: [
-      { pigmentId: "cadmium-red", drops: 2 },
-      { pigmentId: "ultramarine", drops: 2 },
-      { pigmentId: "titanium-white", drops: 4 },
-      { pigmentId: "mars-black", drops: 1 }
-    ]
-  }),
-  createChallenge({
-    id: "moss-field",
-    title: "Moss Field",
-    brief: "Reach a muted natural green using yellow, blue, and black.",
-    maxDrops: 8,
-    palette: ["hansa-yellow", "ultramarine", "titanium-white", "mars-black"],
-    referenceRecipe: [
-      { pigmentId: "hansa-yellow", drops: 3 },
-      { pigmentId: "ultramarine", drops: 2 },
-      { pigmentId: "mars-black", drops: 1 }
-    ]
-  })
-] as const;
+function normalizeSolveChallengeDefinition(definition: SolveChallengeSource): SolveChallengeDefinition {
+  return {
+    id: definition.id,
+    title: definition.title,
+    brief: definition.brief,
+    maxDrops: definition.maxDrops,
+    palette: definition.palette.map((pigmentId) => assertSolvePigmentId(pigmentId)),
+    referenceRecipe: definition.referenceRecipe.map((recipe) => ({
+      pigmentId: assertSolvePigmentId(recipe.pigmentId),
+      drops: recipe.drops
+    }))
+  };
+}
+
+const SOLVE_CHALLENGE_DEFINITIONS = DEFAULT_GAME_CONTENT.solveChallenges.map(
+  normalizeSolveChallengeDefinition
+);
+
+export const SOLVE_CHALLENGES: readonly SolveChallenge[] = SOLVE_CHALLENGE_DEFINITIONS.map(
+  createChallenge
+);
 
 export function isSolvePigmentId(value: string): value is SolvePigmentId {
   return PIGMENT_ID_SET.has(value as SolvePigmentId);
 }
 
-export function getSolvePigment(pigmentId: SolvePigmentId): (typeof SOLVE_PIGMENTS)[number] {
+export function assertSolvePigmentId(value: string): SolvePigmentId {
+  if (!isSolvePigmentId(value)) {
+    throw new Error(`Unknown solve pigment id '${value}'.`);
+  }
+
+  return value;
+}
+
+export function getSolvePigment(pigmentId: SolvePigmentId): SolvePigment {
   return PIGMENT_INDEX[pigmentId];
 }
 
@@ -187,7 +152,7 @@ export function countDropsByPigment(
   >;
 
   for (const pigmentId of dropPigmentIds) {
-    counts[pigmentId] += 1;
+    counts[pigmentId] = (counts[pigmentId] ?? 0) + 1;
   }
 
   return counts;

@@ -1,3 +1,4 @@
+import { DEFAULT_GAME_CONTENT } from "@colormix/content";
 import {
   mixWeightedRgb,
   rgbToHex,
@@ -7,7 +8,7 @@ import {
   type WeightedColorInput
 } from "@colormix/color-engine";
 import { selectNextById } from "./challenge-runner";
-import { getSolvePigment, type SolvePigmentId } from "./solve";
+import { assertSolvePigmentId, getSolvePigment, type SolvePigmentId } from "./solve";
 
 export type PredictFormulaEntry = {
   pigmentId: SolvePigmentId;
@@ -48,6 +49,8 @@ type PredictChallengeDefinition = {
   correctOptionSlot: 0 | 1 | 2 | 3;
 };
 
+type PredictChallengeSource = (typeof DEFAULT_GAME_CONTENT.predictChallenges)[number];
+
 function buildWeightedInputsFromFormula(
   formula: readonly PredictFormulaEntry[]
 ): readonly WeightedColorInput[] {
@@ -59,6 +62,35 @@ function buildWeightedInputsFromFormula(
 
 function colorFromFormula(formula: readonly PredictFormulaEntry[]): RgbColor {
   return mixWeightedRgb(buildWeightedInputsFromFormula(formula));
+}
+
+function assertPredictOptionSlot(value: number): 0 | 1 | 2 | 3 {
+  if (value === 0 || value === 1 || value === 2 || value === 3) {
+    return value;
+  }
+
+  throw new Error(`Invalid predict option slot '${value}'. Expected 0..3.`);
+}
+
+function normalizePredictChallengeDefinition(
+  definition: PredictChallengeSource
+): PredictChallengeDefinition {
+  return {
+    id: definition.id,
+    title: definition.title,
+    brief: definition.brief,
+    formula: definition.formula.map((entry) => ({
+      pigmentId: assertSolvePigmentId(entry.pigmentId),
+      drops: entry.drops
+    })),
+    distractors: definition.distractors.map((formula) =>
+      formula.map((entry) => ({
+        pigmentId: assertSolvePigmentId(entry.pigmentId),
+        drops: entry.drops
+      }))
+    ),
+    correctOptionSlot: assertPredictOptionSlot(definition.correctOptionSlot)
+  };
 }
 
 function createPredictChallenge(definition: PredictChallengeDefinition): PredictChallenge {
@@ -96,93 +128,13 @@ function createPredictChallenge(definition: PredictChallengeDefinition): Predict
   };
 }
 
-export const PREDICT_CHALLENGES: readonly PredictChallenge[] = [
-  createPredictChallenge({
-    id: "predict-coral-flare",
-    title: "Coral Flare",
-    brief: "Pick the resulting swatch for this warm coral recipe.",
-    formula: [
-      { pigmentId: "cadmium-red", drops: 2 },
-      { pigmentId: "hansa-yellow", drops: 1 },
-      { pigmentId: "titanium-white", drops: 2 }
-    ],
-    distractors: [
-      [
-        { pigmentId: "cadmium-red", drops: 2 },
-        { pigmentId: "hansa-yellow", drops: 2 },
-        { pigmentId: "titanium-white", drops: 1 }
-      ],
-      [
-        { pigmentId: "cadmium-red", drops: 1 },
-        { pigmentId: "hansa-yellow", drops: 1 },
-        { pigmentId: "titanium-white", drops: 4 }
-      ],
-      [
-        { pigmentId: "cadmium-red", drops: 2 },
-        { pigmentId: "ultramarine", drops: 1 },
-        { pigmentId: "titanium-white", drops: 2 }
-      ]
-    ],
-    correctOptionSlot: 1
-  }),
-  createPredictChallenge({
-    id: "predict-river-stone",
-    title: "River Stone",
-    brief: "Predict a muted cool neutral from the listed formula.",
-    formula: [
-      { pigmentId: "ultramarine", drops: 2 },
-      { pigmentId: "titanium-white", drops: 3 },
-      { pigmentId: "mars-black", drops: 1 }
-    ],
-    distractors: [
-      [
-        { pigmentId: "ultramarine", drops: 2 },
-        { pigmentId: "titanium-white", drops: 2 }
-      ],
-      [
-        { pigmentId: "ultramarine", drops: 1 },
-        { pigmentId: "titanium-white", drops: 4 },
-        { pigmentId: "mars-black", drops: 1 }
-      ],
-      [
-        { pigmentId: "cadmium-red", drops: 1 },
-        { pigmentId: "ultramarine", drops: 1 },
-        { pigmentId: "titanium-white", drops: 3 },
-        { pigmentId: "mars-black", drops: 1 }
-      ]
-    ],
-    correctOptionSlot: 2
-  }),
-  createPredictChallenge({
-    id: "predict-moss-mint",
-    title: "Moss Mint",
-    brief: "Estimate the green output when yellow and blue are cooled and softened.",
-    formula: [
-      { pigmentId: "hansa-yellow", drops: 2 },
-      { pigmentId: "ultramarine", drops: 1 },
-      { pigmentId: "titanium-white", drops: 2 },
-      { pigmentId: "mars-black", drops: 1 }
-    ],
-    distractors: [
-      [
-        { pigmentId: "hansa-yellow", drops: 3 },
-        { pigmentId: "ultramarine", drops: 1 },
-        { pigmentId: "titanium-white", drops: 1 }
-      ],
-      [
-        { pigmentId: "hansa-yellow", drops: 2 },
-        { pigmentId: "ultramarine", drops: 2 },
-        { pigmentId: "titanium-white", drops: 2 }
-      ],
-      [
-        { pigmentId: "hansa-yellow", drops: 2 },
-        { pigmentId: "ultramarine", drops: 1 },
-        { pigmentId: "titanium-white", drops: 3 }
-      ]
-    ],
-    correctOptionSlot: 0
-  })
-] as const;
+const PREDICT_CHALLENGE_DEFINITIONS = DEFAULT_GAME_CONTENT.predictChallenges.map(
+  normalizePredictChallengeDefinition
+);
+
+export const PREDICT_CHALLENGES: readonly PredictChallenge[] = PREDICT_CHALLENGE_DEFINITIONS.map(
+  createPredictChallenge
+);
 
 export function selectNextPredictChallenge(
   challenges: readonly PredictChallenge[],

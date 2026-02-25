@@ -41,6 +41,9 @@ importers:
       '@colormix/color-engine':
         specifier: workspace:*
         version: link:../../packages/color-engine
+      '@colormix/content':
+        specifier: workspace:*
+        version: link:../../packages/content
       '@colormix/mix-canvas':
         specifier: workspace:*
         version: link:../../packages/mix-canvas

@@ -59,8 +59,9 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 5. `color-engine` perceptual scoring baseline: CIEDE2000 (`DeltaE00`) with calibrated acceptance bands.
 6. Solve mode vertical slice in `apps/web`: challenge lobby, active mix flow, and scored result screen.
 7. Predict mode vertical slice in `apps/web`: formula-driven multiple-choice round and scored results.
-8. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-9. CI: GitHub Actions pipeline for lint/typecheck/test/build.
+8. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
+9. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
+10. CI: GitHub Actions pipeline for lint/typecheck/test/content validation/build.
 
 ## Repository Layout
 
@@ -102,8 +103,9 @@ The web app runs from `apps/web` through the monorepo `dev` task.
 3. `pnpm typecheck` - run strict TypeScript checks.
 4. `pnpm test` - run Vitest suites.
 5. `pnpm build` - build all workspace packages/apps.
-6. `pnpm format` - check formatting.
-7. `pnpm format:write` - write formatting fixes.
+6. `pnpm content:validate` - run content schema/integrity validation.
+7. `pnpm format` - check formatting.
+8. `pnpm format:write` - write formatting fixes.
 
 ## Delivery Plan
 
@@ -147,7 +149,8 @@ Current repository state:
 4. `mix-canvas` supports pointer-driven drag/drop with bowl drop events.
 5. `color-engine` now includes perceptual color scoring via `DeltaE00` and calibrated quality bands.
 6. Solve and Predict mode vertical slices are implemented in `apps/web`.
-7. Next implementation focus is challenge schema tooling and content pack pipelines.
+7. Challenge content schema and validation pipeline are implemented in `@colormix/content` and wired into CI.
+8. Next implementation focus is curated challenge pack balancing and Find the Twin mode.
 
 ## Source Notes
 
