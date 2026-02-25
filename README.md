@@ -50,20 +50,56 @@ Keep architecture compatible with iOS packaging later via a thin native shell (C
 
 Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-## Engineering Strategy
+## Engineering Baseline (Implemented)
 
-The stack prioritizes visual fidelity, deterministic gameplay logic, and long-term maintainability.
+1. Monorepo: `pnpm` workspaces + `Turborepo` task graph.
+2. App shell: `React + Vite + TypeScript` under `apps/web`.
+3. Package boundaries: `color-engine`, `game-domain`, `mix-canvas`, `ui`, `content`.
+4. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
+5. CI: GitHub Actions pipeline for lint/typecheck/test/build.
 
-Planned baseline:
+## Repository Layout
 
-1. App shell: `React + Vite + TypeScript`.
-2. Real-time canvas/rendering: `PixiJS`.
-3. State modeling: `XState` + lightweight global store (`Zustand`).
-4. Persistence: `IndexedDB` through `Dexie`.
-5. Testing: `Vitest`, `Playwright`, visual regression snapshots.
-6. Monorepo/tooling: `pnpm + Turborepo`.
+```text
+.
+├─ .github/workflows/ci.yml
+├─ apps/
+│  └─ web/
+├─ packages/
+│  ├─ color-engine/
+│  ├─ content/
+│  ├─ game-domain/
+│  ├─ mix-canvas/
+│  └─ ui/
+├─ docs/
+└─ README.md
+```
 
-Architecture details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+## Getting Started
+
+Prerequisites:
+
+1. Node.js `>=20.9.0`
+2. `pnpm` `9.x`
+
+Install and run:
+
+```bash
+pnpm install
+pnpm dev
+```
+
+The web app runs from `apps/web` through the monorepo `dev` task.
+
+## Workspace Commands
+
+1. `pnpm dev` - run workspace dev tasks.
+2. `pnpm lint` - run ESLint across workspaces.
+3. `pnpm typecheck` - run strict TypeScript checks.
+4. `pnpm test` - run Vitest suites.
+5. `pnpm build` - build all workspace packages/apps.
+6. `pnpm format` - check formatting.
+7. `pnpm format:write` - write formatting fixes.
 
 ## Delivery Plan
 
@@ -81,8 +117,8 @@ Detailed plan: [`docs/DELIVERY_PLAN.md`](docs/DELIVERY_PLAN.md).
 
 Backlog is intentionally lightweight but always current.
 
-1. Keep only actionable items in `Now`.
-2. Move completed work to changelog section.
+1. Keep only actionable items in `NOW`.
+2. Move completed work to history with date.
 3. Re-prioritize weekly based on quality gates and risk.
 
 Backlog source of truth: [`docs/BACKLOG.md`](docs/BACKLOG.md).
@@ -95,14 +131,16 @@ Backlog source of truth: [`docs/BACKLOG.md`](docs/BACKLOG.md).
 4. Quality standards: [`docs/QUALITY_STANDARDS.md`](docs/QUALITY_STANDARDS.md)
 5. Backlog: [`docs/BACKLOG.md`](docs/BACKLOG.md)
 6. Documentation maintenance rules: [`docs/DOCS_MAINTENANCE.md`](docs/DOCS_MAINTENANCE.md)
+7. Architecture decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 
 ## Current Status
 
 Current repository state:
 
-1. Product concept is defined.
-2. Project-level documentation baseline is established.
-3. Engineering implementation scaffold has not been started yet.
+1. Product and architecture documentation baseline is established.
+2. Monorepo scaffold and CI baseline are implemented.
+3. Initial web app shell and shared package skeletons are implemented.
+4. Next implementation focus is tactile interaction depth in `mix-canvas` and perceptual scoring calibration.
 
 ## Source Notes
 
