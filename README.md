@@ -58,8 +58,9 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 4. `mix-canvas` pointer interaction baseline: drag pigments into a bowl with callback events.
 5. `color-engine` perceptual scoring baseline: CIEDE2000 (`DeltaE00`) with calibrated acceptance bands.
 6. Solve mode vertical slice in `apps/web`: challenge lobby, active mix flow, and scored result screen.
-7. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-8. CI: GitHub Actions pipeline for lint/typecheck/test/build.
+7. Predict mode vertical slice in `apps/web`: formula-driven multiple-choice round and scored results.
+8. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
+9. CI: GitHub Actions pipeline for lint/typecheck/test/build.
 
 ## Repository Layout
 
@@ -145,8 +146,8 @@ Current repository state:
 3. Initial web app shell and shared package skeletons are implemented.
 4. `mix-canvas` supports pointer-driven drag/drop with bowl drop events.
 5. `color-engine` now includes perceptual color scoring via `DeltaE00` and calibrated quality bands.
-6. Solve mode vertical slice is implemented in `apps/web`.
-7. Next implementation focus is Predict mode vertical slice and challenge schema tooling.
+6. Solve and Predict mode vertical slices are implemented in `apps/web`.
+7. Next implementation focus is challenge schema tooling and content pack pipelines.
 
 ## Source Notes
 

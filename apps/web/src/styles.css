@@ -82,6 +82,30 @@ code {
   font-size: 0.93em;
 }
 
+.mode-switch {
+  margin-top: 1rem;
+  display: inline-flex;
+  gap: 0.45rem;
+  border-radius: 999px;
+  padding: 0.35rem;
+  background: #ece5d8;
+}
+
+.mode-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  background: transparent;
+  color: #50545e;
+}
+
+.mode-button.active {
+  background: #243a5c;
+  color: #ffffff;
+}
+
 .board-intro {
   display: grid;
   gap: 0.9rem;
@@ -91,14 +115,17 @@ code {
 .intro-main,
 .intro-side,
 .control-panel,
-.canvas-panel {
+.canvas-panel,
+.predict-main,
+.predict-side {
   border-radius: 16px;
   border: 1px solid #ece5d8;
   background: #fffdfa;
   padding: 0.9rem;
 }
 
-.intro-side {
+.intro-side,
+.predict-side {
   display: grid;
   gap: 0.6rem;
   align-content: start;
@@ -110,14 +137,20 @@ code {
   color: #4f5258;
 }
 
-.target-preview {
+.section-label {
+  margin-top: 0.5rem;
+}
+
+.target-preview,
+.selected-preview {
   display: inline-grid;
   justify-items: start;
   gap: 0.4rem;
 }
 
 .palette-list,
-.drop-breakdown {
+.drop-breakdown,
+.formula-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -126,7 +159,8 @@ code {
 }
 
 .palette-list li,
-.drop-breakdown li {
+.drop-breakdown li,
+.formula-list li {
   border: 1px solid #eee7d8;
   border-radius: 12px;
   padding: 0.48rem 0.6rem;
@@ -150,7 +184,8 @@ code {
   width: 100%;
 }
 
-.control-panel {
+.control-panel,
+.predict-main {
   display: grid;
   gap: 0.75rem;
   align-content: start;
@@ -244,18 +279,64 @@ code {
   color: #373d46;
 }
 
+.board-predict {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+}
+
+.option-grid {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.option-card {
+  border: 1px solid #e6decd;
+  border-radius: 14px;
+  padding: 0.65rem;
+  background: #ffffff;
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.option-card.selected {
+  border-color: #1f7566;
+  box-shadow: 0 0 0 2px rgba(31, 117, 102, 0.2);
+}
+
+.option-token {
+  color: #596070;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .board-result {
   display: grid;
   gap: 0.8rem;
   justify-items: start;
 }
 
+.status-pill,
 .band-pill {
   margin: 0;
   border-radius: 999px;
   padding: 0.35rem 0.7rem;
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+.status-correct {
+  background: #daf2df;
+  color: #19552a;
+}
+
+.status-wrong {
+  background: #f5dddd;
+  color: #7e2424;
 }
 
 .band-perfect {
@@ -305,13 +386,15 @@ code {
 
 @media (max-width: 900px) {
   .board-intro,
-  .board-mixing {
+  .board-mixing,
+  .board-predict {
     grid-template-columns: 1fr;
   }
 
   .swatch-grid,
   .result-swatches,
-  .result-stats {
+  .result-stats,
+  .option-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -49,3 +49,12 @@ Template:
 - Decision: Define each Solve challenge with a reference recipe and derive target colors from that recipe using the same mixing engine used for player attempts.
 - Alternatives considered: hand-picked static target RGB values independent of recipe generation.
 - Consequences: immediate fairness and reproducibility for challenge tuning; content tooling should preserve this pattern as challenge volume scales.
+
+## ADR-005
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: Solve and Predict modes both need consistent challenge cycling behavior and deterministic fallback handling.
+- Decision: Introduce a shared `selectNextById` challenge-runner utility and use it in both mode modules (`solve.ts`, `predict.ts`) instead of mode-specific duplicated selection logic.
+- Alternatives considered: independent per-mode `selectNextChallenge` implementations.
+- Consequences: lower duplication, consistent behavior across modes, and a clearer foundation for future mode additions.
