@@ -63,9 +63,12 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 9. Color Diary (`Collect`) mode vertical slice in `apps/web`: local-first save/edit/delete flow, filter/sort/search controls, and collection wall UI.
 10. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
 11. Curated starter pack balancing: challenge difficulty tiers (`easy`/`medium`/`hard`) and validation rules for progression, mode mix, and perceptual distractor spacing.
-12. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-13. Baseline E2E coverage: Playwright flow for mode switching and diary save/edit/delete.
-14. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
+12. Sound and motion polish baseline: subtle Web Audio cues with user toggle + reduced-motion-safe transitions.
+13. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest, Playwright.
+14. Baseline E2E coverage: mode switching and diary save/edit/delete flow.
+15. Optional iPad packaging track scaffolded with Capacitor config/scripts and runbook.
+16. Optional cloud sync architecture contracts in `@colormix/game-domain` + dedicated architecture doc.
+17. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
 
 ## Repository Layout
 
@@ -111,6 +114,8 @@ The web app runs from `apps/web` through the monorepo `dev` task.
 7. `pnpm format` - check formatting.
 8. `pnpm format:write` - write formatting fixes.
 9. `pnpm run test:e2e` - run Playwright Chromium baseline end-to-end flows.
+10. `pnpm run ios:prepare` - build web assets and sync into Capacitor iOS shell.
+11. `pnpm run ios:open` - open the iOS project in Xcode after sync.
 
 ## Delivery Plan
 
@@ -143,6 +148,8 @@ Backlog source of truth: [`docs/BACKLOG.md`](docs/BACKLOG.md).
 5. Backlog: [`docs/BACKLOG.md`](docs/BACKLOG.md)
 6. Documentation maintenance rules: [`docs/DOCS_MAINTENANCE.md`](docs/DOCS_MAINTENANCE.md)
 7. Architecture decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md)
+8. iPad packaging runbook: [`docs/IPAD_PACKAGING.md`](docs/IPAD_PACKAGING.md)
+9. Cloud sync architecture: [`docs/CLOUD_SYNC_ARCHITECTURE.md`](docs/CLOUD_SYNC_ARCHITECTURE.md)
 
 ## Current Status
 
@@ -156,7 +163,8 @@ Current repository state:
 6. Solve, Predict, Find the Twin, and Color Diary mode vertical slices are implemented in `apps/web`.
 7. Challenge content schema and validation pipeline are implemented in `@colormix/content` and wired into CI.
 8. First curated starter challenge pack + balancing pass is implemented in `@colormix/content`.
-9. Current implementation focus is M4 polish (`B-012`) before optional packaging work.
+9. Sound/motion polish and baseline E2E coverage are complete for M4 hardening.
+10. Optional iPad packaging and optional cloud-sync architecture tracks are scaffolded for post-V1 rollout.
 
 ## Source Notes
 

@@ -39,10 +39,12 @@ body {
 
 .hero {
   padding: 1.4rem 1.6rem;
+  animation: surface-enter 220ms ease-out both;
 }
 
 .board {
   padding: 1rem;
+  animation: surface-enter 260ms ease-out both;
 }
 
 .eyebrow {
@@ -99,11 +101,51 @@ code {
   font-weight: 600;
   background: transparent;
   color: #50545e;
+  transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.mode-button:hover {
+  transform: translateY(-1px);
 }
 
 .mode-button.active {
   background: #243a5c;
   color: #ffffff;
+}
+
+.polish-controls {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.sound-toggle {
+  border: 1px solid #d5ccbd;
+  border-radius: 999px;
+  padding: 0.36rem 0.7rem;
+  background: #ffffff;
+  color: #3b4351;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 140ms ease, transform 140ms ease, background-color 140ms ease;
+}
+
+.sound-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.sound-toggle.active {
+  border-color: #1f7566;
+  background: #e7f5ef;
+  color: #0f5448;
+}
+
+.motion-note {
+  margin: 0;
+  color: #616979;
+  font-size: 0.83rem;
 }
 
 .board-intro {
@@ -224,6 +266,7 @@ code {
   display: grid;
   gap: 0.35rem;
   justify-items: start;
+  transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
 .label {
@@ -390,11 +433,18 @@ code {
   justify-items: start;
   text-align: left;
   cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+
+.diary-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.09);
 }
 
 .diary-card.selected {
   border-color: #1f7566;
   box-shadow: 0 0 0 2px rgba(31, 117, 102, 0.2);
+  transform: translateY(-1px);
 }
 
 .diary-meta {
@@ -424,11 +474,18 @@ code {
   justify-items: start;
   gap: 0.35rem;
   cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+
+.option-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.09);
 }
 
 .option-card.selected {
   border-color: #1f7566;
   box-shadow: 0 0 0 2px rgba(31, 117, 102, 0.2);
+  transform: translateY(-1px);
 }
 
 .option-token {
@@ -451,6 +508,7 @@ code {
   padding: 0.35rem 0.7rem;
   font-weight: 600;
   font-size: 0.9rem;
+  animation: badge-pop 180ms ease-out both;
 }
 
 .status-correct {
@@ -500,12 +558,42 @@ code {
   border: 1px solid #ece6da;
   padding: 0.6rem;
   background: #ffffff;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.result-stats article:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.09);
 }
 
 .result-stats p {
   margin-top: 0.35rem;
   font-size: 1.3rem;
   font-weight: 650;
+}
+
+@keyframes surface-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes badge-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @media (max-width: 900px) {
@@ -527,5 +615,16 @@ code {
 
   .diary-toolbar {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -19,7 +19,7 @@ Template:
 - Date: 2026-02-25
 - Status: accepted
 - Context: Project needs fast iteration on desktop plus future iPad packaging, while preserving premium interaction quality.
-- Decision: Build web-first with React + Vite for app shell and PixiJS for real-time mixing canvas; keep domain logic framework-agnostic in workspace packages.
+- Decision: Build web-first with React + Vite for app shell and a workspace-isolated `MixCanvas` renderer for real-time interactions; keep domain logic framework-agnostic in workspace packages.
 - Alternatives considered: full native-first iPad implementation from day one; Unity-first cross-platform build.
 - Consequences: faster local iteration and easier early testing; strict engineering discipline needed to preserve tactile quality and performance.
 
@@ -103,3 +103,30 @@ Template:
 - Decision: Adopt Playwright as the baseline E2E framework, add a Chromium smoke suite under `tests/e2e`, and enforce execution in CI with explicit browser installation before test run.
 - Alternatives considered: keep only Vitest integration tests; defer E2E until post-polish milestone.
 - Consequences: stronger regression protection for cross-mode UI behavior and persistence interactions; CI runtime increases slightly and local contributors must install Playwright browsers to run E2E tests.
+
+## ADR-011
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-012 required a polish pass for feedback quality while preserving calm UX and accessibility constraints.
+- Decision: Add subtle UI motion transitions and deterministic Web Audio cue playback with a persisted user toggle (`colormix.sound.enabled.v1`), while honoring system reduced-motion preferences via CSS.
+- Alternatives considered: no audio/motion in V1; heavier animation and sample-based audio effects.
+- Consequences: improved action feedback without clutter; behavior remains user-controllable and accessibility-safe, with small added client complexity.
+
+## ADR-012
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-013 needed an iPad packaging track, but current repository Node baseline is `>=20.9.0`.
+- Decision: Adopt Capacitor `v7` (`@capacitor/cli`, `@capacitor/core`, `@capacitor/ios`) with root-level config/scripts and a dedicated runbook, avoiding Node-22-only Capacitor `v8` for now.
+- Alternatives considered: immediate upgrade to Node 22 and Capacitor v8; defer packaging entirely.
+- Consequences: packaging track is usable under existing runtime constraints; future upgrade to Capacitor v8 can be treated as a discrete infra migration.
+
+## ADR-013
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-014 required defining cloud sync architecture without introducing backend coupling into current local-first gameplay loops.
+- Decision: Define deterministic sync envelope contracts and merge policy in `@colormix/game-domain` (`cloud-sync.ts`) and pair them with a dedicated architecture document (`docs/CLOUD_SYNC_ARCHITECTURE.md`).
+- Alternatives considered: postpone sync architecture until backend implementation starts; define contracts only in docs without executable domain utilities.
+- Consequences: clearer path for post-V1 cross-device continuity with testable merge behavior; implementation still requires queue storage, backend endpoints, and auth rollout in later phases.

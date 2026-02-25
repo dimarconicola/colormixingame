@@ -26,3 +26,13 @@ export function markChallengeComplete(
     completedChallengeIds: [...progress.completedChallengeIds, challengeId]
   };
 }
+
+export {
+  collapseEnvelopeQueue,
+  envelopeEntityKey,
+  mergeEnvelope,
+  shouldApplyRemoteEnvelope,
+  type SyncEntityType,
+  type SyncEnvelope,
+  type SyncOperation
+} from "./cloud-sync";

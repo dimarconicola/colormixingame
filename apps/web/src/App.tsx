@@ -32,6 +32,13 @@ import {
   type PredictChallenge
 } from "./predict";
 import {
+  createUiSoundPlayer,
+  readSoundEnabled,
+  writeSoundEnabled,
+  type SoundCue,
+  type UiSoundPlayer
+} from "./polish";
+import {
   SOLVE_CHALLENGES,
   countDropsByPigment,
   evaluateSolveAttempt,
@@ -52,8 +59,10 @@ type DiscriminatePhase = "landing" | "guessing" | "result";
 
 export function App() {
   const canvasHostRef = useRef<HTMLDivElement | null>(null);
+  const soundPlayerRef = useRef<UiSoundPlayer | null>(null);
 
   const [mode, setMode] = useState<GameMode>("solve");
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   const [solvePhase, setSolvePhase] = useState<SolvePhase>("landing");
   const [solveChallenge, setSolveChallenge] = useState<SolveChallenge>(() =>
@@ -218,9 +227,15 @@ export function App() {
   }, [mode, solvePhase, solveChallenge, solveSessionKey]);
 
   useEffect(() => {
+    soundPlayerRef.current = createUiSoundPlayer();
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
+
+    setSoundEnabled(readSoundEnabled(window.localStorage));
 
     const entries = readDiaryEntries(window.localStorage);
     setDiaryEntries(entries);
@@ -234,6 +249,14 @@ export function App() {
 
     writeDiaryEntries(diaryEntries, window.localStorage);
   }, [diaryEntries]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    writeSoundEnabled(soundEnabled, window.localStorage);
+  }, [soundEnabled]);
 
   useEffect(() => {
     if (!selectedDiaryEntry) {
@@ -251,6 +274,7 @@ export function App() {
     setSolveResult(null);
     setSolvePhase("mixing");
     setSolveSessionKey((previous) => previous + 1);
+    playCue("start");
   };
 
   const resetSolveMix = () => {
@@ -258,6 +282,7 @@ export function App() {
     setSolveResult(null);
     setSolvePhase("mixing");
     setSolveSessionKey((previous) => previous + 1);
+    playCue("tap");
   };
 
   const cycleSolveChallenge = (nextPhase: SolvePhase) => {
@@ -266,6 +291,7 @@ export function App() {
     setSolveResult(null);
     setSolvePhase(nextPhase);
     setSolveSessionKey((previous) => previous + 1);
+    playCue("tap");
   };
 
   const submitSolveAttempt = () => {
@@ -273,14 +299,18 @@ export function App() {
       return;
     }
 
-    setSolveResult(evaluateSolveAttempt(solveChallenge, attemptColor));
+    const result = evaluateSolveAttempt(solveChallenge, attemptColor);
+
+    setSolveResult(result);
     setSolvePhase("result");
+    playCue(result.passed ? "success" : "error");
   };
 
   const startPredictChallenge = () => {
     setPredictSelectedOptionId(null);
     setPredictResult(null);
     setPredictPhase("guessing");
+    playCue("start");
   };
 
   const cyclePredictChallenge = (nextPhase: PredictPhase) => {
@@ -288,6 +318,7 @@ export function App() {
     setPredictSelectedOptionId(null);
     setPredictResult(null);
     setPredictPhase(nextPhase);
+    playCue("tap");
   };
 
   const submitPredictAttempt = () => {
@@ -303,12 +334,14 @@ export function App() {
 
     setPredictResult(evaluation);
     setPredictPhase("result");
+    playCue(evaluation.isCorrect ? "success" : "error");
   };
 
   const startDiscriminateChallenge = () => {
     setDiscriminateSelectedOptionId(null);
     setDiscriminateResult(null);
     setDiscriminatePhase("guessing");
+    playCue("start");
   };
 
   const cycleDiscriminateChallenge = (nextPhase: DiscriminatePhase) => {
@@ -318,6 +351,7 @@ export function App() {
     setDiscriminateSelectedOptionId(null);
     setDiscriminateResult(null);
     setDiscriminatePhase(nextPhase);
+    playCue("tap");
   };
 
   const submitDiscriminateAttempt = () => {
@@ -333,12 +367,39 @@ export function App() {
 
     setDiscriminateResult(evaluation);
     setDiscriminatePhase("result");
+    playCue(evaluation.isCorrect ? "success" : "error");
+  };
+
+  const playCue = (cue: SoundCue) => {
+    if (!soundEnabled) {
+      return;
+    }
+
+    soundPlayerRef.current?.play(cue);
+  };
+
+  const selectMode = (nextMode: GameMode) => {
+    setMode(nextMode);
+    playCue("tap");
+  };
+
+  const toggleSound = () => {
+    setSoundEnabled((current) => {
+      const next = !current;
+
+      if (next) {
+        soundPlayerRef.current?.play("tap");
+      }
+
+      return next;
+    });
   };
 
   const addDiaryEntry = (entry: DiaryEntry) => {
     setDiaryEntries((current) => prependDiaryEntry(current, entry));
     setSelectedDiaryEntryId(entry.id);
     setMode("collect");
+    playCue("save");
   };
 
   const saveSolveResultToDiary = () => {
@@ -393,6 +454,7 @@ export function App() {
         note: diaryDraftNote
       })
     );
+    playCue("save");
   };
 
   const deleteSelectedDiaryEntry = () => {
@@ -401,6 +463,7 @@ export function App() {
     }
 
     setDiaryEntries((current) => removeDiaryEntry(current, selectedDiaryEntry.id));
+    playCue("delete");
   };
 
   const modeDescription =
@@ -434,7 +497,7 @@ export function App() {
             role="tab"
             aria-selected={mode === "solve"}
             className={`mode-button ${mode === "solve" ? "active" : ""}`}
-            onClick={() => setMode("solve")}
+            onClick={() => selectMode("solve")}
           >
             Solve
           </button>
@@ -443,7 +506,7 @@ export function App() {
             role="tab"
             aria-selected={mode === "predict"}
             className={`mode-button ${mode === "predict" ? "active" : ""}`}
-            onClick={() => setMode("predict")}
+            onClick={() => selectMode("predict")}
           >
             Predict
           </button>
@@ -452,7 +515,7 @@ export function App() {
             role="tab"
             aria-selected={mode === "discriminate"}
             className={`mode-button ${mode === "discriminate" ? "active" : ""}`}
-            onClick={() => setMode("discriminate")}
+            onClick={() => selectMode("discriminate")}
           >
             Find the Twin
           </button>
@@ -461,10 +524,22 @@ export function App() {
             role="tab"
             aria-selected={mode === "collect"}
             className={`mode-button ${mode === "collect" ? "active" : ""}`}
-            onClick={() => setMode("collect")}
+            onClick={() => selectMode("collect")}
           >
             Color Diary
           </button>
+        </div>
+
+        <div className="polish-controls">
+          <button
+            type="button"
+            className={`sound-toggle ${soundEnabled ? "active" : ""}`}
+            onClick={toggleSound}
+            aria-pressed={soundEnabled}
+          >
+            Sound: {soundEnabled ? "On" : "Off"}
+          </button>
+          <p className="motion-note">Motion effects respect your system reduced-motion setting.</p>
         </div>
       </header>
 

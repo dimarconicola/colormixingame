@@ -18,21 +18,21 @@
 
 ## 2.2 Real-Time Rendering and Input
 
-1. `PixiJS` for GPU-backed 2D rendering.
-2. Custom interaction layer for touch drag/drop and gesture smoothing.
-3. Shader-friendly pipeline to support paint-like visual blending.
+1. Custom `MixCanvas` package built on `HTMLCanvasElement` 2D context.
+2. Pointer-event drag/drop interaction model with deterministic bowl-drop callbacks.
+3. Package boundary kept renderer-agnostic so future GPU backends remain possible.
 
 ## 2.3 State and Game Flow
 
-1. `XState` for deterministic game mode state machines.
-2. `Zustand` for lightweight app-level shared state.
-3. Event-driven action log for replay/debug hooks.
+1. React state + pure domain modules for deterministic mode behavior.
+2. Shared mode utilities in app-layer modules (challenge runner, evaluation helpers).
+3. Domain contracts in workspace packages for future state-machine extraction if complexity grows.
 
 ## 2.4 Data and Persistence
 
-1. `Dexie` + `IndexedDB` for local offline saves.
-2. Versioned storage schema for migrations.
-3. Import/export adapters for future cross-device support.
+1. Local-first browser storage for diary and polish preferences.
+2. Versioned key strategy to support safe data migrations.
+3. Optional cloud-sync architecture defined for post-V1 rollout.
 
 ## 2.5 Tooling and Monorepo
 
@@ -161,18 +161,28 @@ Core entities:
 ## 10. iPad Packaging Strategy (Later Phase)
 
 1. Keep runtime browser-compatible from day one.
-2. Introduce `Capacitor` wrapper when core loops stabilize.
+2. Use a `Capacitor` wrapper and iOS runbook once core loops stabilize.
 3. Verify touch, audio lifecycle, and persistence behavior in iOS WebView.
 4. Keep packaging shell thin and avoid platform-specific logic in core modules.
 
-## 11. Security and Privacy Baseline
+Packaging runbook: `docs/IPAD_PACKAGING.md`.
+
+## 11. Cloud Sync Strategy (Optional Post-V1)
+
+1. Keep local-first behavior as source of truth for immediate UX.
+2. Use deterministic envelope merge policy in `@colormix/game-domain`.
+3. Roll out cloud sync in explicit phases after backend readiness.
+
+Cloud sync architecture: `docs/CLOUD_SYNC_ARCHITECTURE.md`.
+
+## 12. Security and Privacy Baseline
 
 1. No ad/tracking SDKs in V1.
 2. Store only necessary local user data.
 3. Avoid collecting personal identifiers by default.
 4. Keep all telemetry first-party and documented.
 
-## 12. ADR Process
+## 13. ADR Process
 
 Any non-trivial technical decision should be logged as an Architecture Decision Record:
 
@@ -182,4 +192,3 @@ Any non-trivial technical decision should be logged as an Architecture Decision 
 4. Consequences.
 
 Decision log file: `docs/DECISIONS.md`.
-
