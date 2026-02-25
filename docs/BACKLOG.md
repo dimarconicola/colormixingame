@@ -18,30 +18,30 @@ Status values:
 
 ## 2. NOW
 
-1. `B-006` Implement Solve mode vertical slice (from challenge start to result screen).
-2. `B-007` Implement Predict mode vertical slice reusing challenge runner.
-3. `B-008` Define challenge content schema and validation script.
+1. `B-007` Implement Predict mode vertical slice reusing challenge runner.
+2. `B-008` Define challenge content schema and validation script.
+3. `B-009` Create first curated challenge pack and balance pass.
 
 ## 3. NEXT
 
-1. `B-009` Create first curated challenge pack and balance pass.
-2. `B-010` Implement Find the Twin mode with contextual perception variants.
-3. `B-011` Implement Color Diary with save/edit/collection wall.
-4. `B-012` Add sound and motion polish pass.
+1. `B-010` Implement Find the Twin mode with contextual perception variants.
+2. `B-011` Implement Color Diary with save/edit/collection wall.
+3. `B-012` Add sound and motion polish pass.
+4. `B-013` Build optional iPad packaging track using Capacitor.
 
 ## 4. LATER
 
-1. `B-013` Build optional iPad packaging track using Capacitor.
-2. `B-014` Define optional cloud sync architecture (post-V1 only).
+1. `B-014` Define optional cloud sync architecture (post-V1 only).
 
 ## 5. Completed
 
-1. `B-005` Perceptual scoring module implemented in `@colormix/color-engine` with CIEDE2000 (`DeltaE00`) + calibrated acceptance bands (`1.0`, `2.2`, `4.0`, `8.0`) and coverage tests on 2026-02-25.
-2. `B-004` `mix-canvas` upgraded to pointer-driven drag/drop interactions with bowl drop callbacks and web demo integration on 2026-02-25.
-3. `B-003` Initial `color-engine` package skeleton and test harness created on 2026-02-25.
-4. `B-002` Strict TypeScript/lint/format/test baseline and CI workflow created on 2026-02-25.
-5. `B-001` Monorepo scaffold (`apps/web`, `packages/*`) and base tooling created on 2026-02-25.
-6. `B-000` Documentation baseline (README + product/architecture/quality/delivery/backlog docs) created on 2026-02-25.
+1. `B-006` Solve mode vertical slice implemented in `apps/web` (challenge lobby, active mixing flow, and scored result screen) with `DeltaE00` scoring + coverage tests on 2026-02-25.
+2. `B-005` Perceptual scoring module implemented in `@colormix/color-engine` with CIEDE2000 (`DeltaE00`) + calibrated acceptance bands (`1.0`, `2.2`, `4.0`, `8.0`) and coverage tests on 2026-02-25.
+3. `B-004` `mix-canvas` upgraded to pointer-driven drag/drop interactions with bowl drop callbacks and web demo integration on 2026-02-25.
+4. `B-003` Initial `color-engine` package skeleton and test harness created on 2026-02-25.
+5. `B-002` Strict TypeScript/lint/format/test baseline and CI workflow created on 2026-02-25.
+6. `B-001` Monorepo scaffold (`apps/web`, `packages/*`) and base tooling created on 2026-02-25.
+7. `B-000` Documentation baseline (README + product/architecture/quality/delivery/backlog docs) created on 2026-02-25.
 
 ## 6. Next Review
 

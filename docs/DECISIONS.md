@@ -40,3 +40,12 @@ Template:
 - Decision: Implement CIEDE2000 (`DeltaE00`) in `@colormix/color-engine` and use initial acceptance bands at `1.0` (perfect), `2.2` (excellent), `4.0` (good), `8.0` (fair), else `miss`.
 - Alternatives considered: CIE76-only scoring, ad hoc RGB/HSV thresholding.
 - Consequences: stronger alignment with perceived differences and better calibration consistency; requires ongoing tuning against playtest data.
+
+## ADR-004
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: The Solve mode vertical slice needed reliable pass/fail behavior without unsolvable targets caused by palette mismatch.
+- Decision: Define each Solve challenge with a reference recipe and derive target colors from that recipe using the same mixing engine used for player attempts.
+- Alternatives considered: hand-picked static target RGB values independent of recipe generation.
+- Consequences: immediate fairness and reproducibility for challenge tuning; content tooling should preserve this pattern as challenge volume scales.

@@ -57,8 +57,9 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 3. Package boundaries: `color-engine`, `game-domain`, `mix-canvas`, `ui`, `content`.
 4. `mix-canvas` pointer interaction baseline: drag pigments into a bowl with callback events.
 5. `color-engine` perceptual scoring baseline: CIEDE2000 (`DeltaE00`) with calibrated acceptance bands.
-6. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-7. CI: GitHub Actions pipeline for lint/typecheck/test/build.
+6. Solve mode vertical slice in `apps/web`: challenge lobby, active mix flow, and scored result screen.
+7. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
+8. CI: GitHub Actions pipeline for lint/typecheck/test/build.
 
 ## Repository Layout
 
@@ -142,9 +143,10 @@ Current repository state:
 1. Product and architecture documentation baseline is established.
 2. Monorepo scaffold and CI baseline are implemented.
 3. Initial web app shell and shared package skeletons are implemented.
-4. `mix-canvas` now supports pointer-driven drag/drop with bowl drop events and a live demo in `apps/web`.
+4. `mix-canvas` supports pointer-driven drag/drop with bowl drop events.
 5. `color-engine` now includes perceptual color scoring via `DeltaE00` and calibrated quality bands.
-6. Next implementation focus is Solve mode vertical slice and challenge schema design.
+6. Solve mode vertical slice is implemented in `apps/web`.
+7. Next implementation focus is Predict mode vertical slice and challenge schema tooling.
 
 ## Source Notes
 
