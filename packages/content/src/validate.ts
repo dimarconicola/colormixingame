@@ -4,6 +4,8 @@ import type {
   ChallengePackDefinition,
   ContentRgbColor,
   ContentValidationIssue,
+  DiscriminateChallengeDefinition,
+  DiscriminateContextVariant,
   FormulaEntryDefinition,
   GameContentDefinition,
   PigmentDefinition,
@@ -38,6 +40,11 @@ const DIFFICULTY_ORDER: Record<ChallengeDifficulty, number> = {
 };
 
 const CHALLENGE_DIFFICULTIES = new Set<ChallengeDifficulty>(["easy", "medium", "hard"]);
+const DISCRIMINATE_CONTEXT_VARIANTS = new Set<DiscriminateContextVariant>([
+  "neutral-studio",
+  "warm-gallery",
+  "cool-shadow"
+]);
 
 type SolveBalanceProfile = {
   maxDrops: readonly [min: number, max: number];
@@ -87,7 +94,23 @@ const PREDICT_BALANCE_PROFILES: Record<ChallengeDifficulty, PredictBalanceProfil
   }
 };
 
-type ChallengeMode = "solve" | "predict";
+type DiscriminateBalanceProfile = {
+  distractorDeltaE00: readonly [min: number, max: number];
+};
+
+const DISCRIMINATE_BALANCE_PROFILES: Record<ChallengeDifficulty, DiscriminateBalanceProfile> = {
+  easy: {
+    distractorDeltaE00: [4.5, 22]
+  },
+  medium: {
+    distractorDeltaE00: [2.5, 12]
+  },
+  hard: {
+    distractorDeltaE00: [0.7, 6]
+  }
+};
+
+type ChallengeMode = "solve" | "predict" | "discriminate";
 
 type ChallengeMetadata = {
   mode: ChallengeMode;
@@ -96,6 +119,10 @@ type ChallengeMetadata = {
 
 function isChallengeDifficulty(value: string): value is ChallengeDifficulty {
   return CHALLENGE_DIFFICULTIES.has(value as ChallengeDifficulty);
+}
+
+function isDiscriminateContextVariant(value: string): value is DiscriminateContextVariant {
+  return DISCRIMINATE_CONTEXT_VARIANTS.has(value as DiscriminateContextVariant);
 }
 
 function validateDifficulty(
@@ -108,6 +135,23 @@ function validateDifficulty(
   }
 
   addIssue(issues, path, "Difficulty must be one of: easy, medium, hard.");
+  return false;
+}
+
+function validateDiscriminateContextVariant(
+  issues: ContentValidationIssue[],
+  path: string,
+  contextVariant: string
+): contextVariant is DiscriminateContextVariant {
+  if (isDiscriminateContextVariant(contextVariant)) {
+    return true;
+  }
+
+  addIssue(
+    issues,
+    path,
+    "Context variant must be one of: neutral-studio, warm-gallery, cool-shadow."
+  );
   return false;
 }
 
@@ -478,6 +522,129 @@ function validatePredictChallenge(
   }
 }
 
+function validateDiscriminateChallenge(
+  issues: ContentValidationIssue[],
+  challenge: DiscriminateChallengeDefinition,
+  index: number
+): void {
+  const path = `discriminateChallenges[${index}]`;
+
+  if (!isNonEmptyString(challenge.id)) {
+    addIssue(issues, `${path}.id`, "Challenge id cannot be empty.");
+  }
+
+  if (!isNonEmptyString(challenge.title)) {
+    addIssue(issues, `${path}.title`, "Challenge title cannot be empty.");
+  }
+
+  if (!isNonEmptyString(challenge.brief)) {
+    addIssue(issues, `${path}.brief`, "Challenge brief cannot be empty.");
+  }
+
+  const hasValidDifficulty = validateDifficulty(
+    issues,
+    `${path}.difficulty`,
+    challenge.difficulty
+  );
+  validateDiscriminateContextVariant(
+    issues,
+    `${path}.contextVariant`,
+    challenge.contextVariant
+  );
+
+  validateRgbColor(issues, `${path}.target`, challenge.target);
+
+  if (challenge.options.length !== 4) {
+    addIssue(
+      issues,
+      `${path}.options`,
+      "Discriminate challenges must define exactly 4 options."
+    );
+  }
+
+  for (const [optionIndex, option] of challenge.options.entries()) {
+    validateRgbColor(issues, `${path}.options[${optionIndex}]`, option);
+  }
+
+  if (!Number.isInteger(challenge.correctOptionSlot) || challenge.correctOptionSlot < 0) {
+    addIssue(
+      issues,
+      `${path}.correctOptionSlot`,
+      "correctOptionSlot must be a non-negative integer."
+    );
+  }
+
+  const maxOptionIndex = challenge.options.length - 1;
+
+  if (challenge.correctOptionSlot > maxOptionIndex) {
+    addIssue(
+      issues,
+      `${path}.correctOptionSlot`,
+      "correctOptionSlot must fit into the final option list."
+    );
+  }
+
+  const correctOption = challenge.options[challenge.correctOptionSlot];
+
+  if (!correctOption) {
+    return;
+  }
+
+  const correctDeltaE00 = scorePerceptualMatch(challenge.target, correctOption).deltaE00;
+
+  if (correctDeltaE00 > 0.25) {
+    addIssue(
+      issues,
+      `${path}.options[${challenge.correctOptionSlot}]`,
+      "The configured correct option must be perceptually identical to the target."
+    );
+  }
+
+  const distractorHexes = new Set<string>();
+
+  for (const [optionIndex, option] of challenge.options.entries()) {
+    if (optionIndex === challenge.correctOptionSlot) {
+      continue;
+    }
+
+    const deltaE00 = scorePerceptualMatch(challenge.target, option).deltaE00;
+
+    if (deltaE00 <= 0.25) {
+      addIssue(
+        issues,
+        `${path}.options[${optionIndex}]`,
+        "Distractor options must differ perceptually from the target."
+      );
+    }
+
+    const optionHexKey = `${option.r}-${option.g}-${option.b}`;
+
+    if (distractorHexes.has(optionHexKey)) {
+      addIssue(
+        issues,
+        `${path}.options[${optionIndex}]`,
+        "Distractor options must be unique."
+      );
+    }
+
+    distractorHexes.add(optionHexKey);
+
+    if (!hasValidDifficulty) {
+      continue;
+    }
+
+    const profile = DISCRIMINATE_BALANCE_PROFILES[challenge.difficulty];
+
+    validateBalanceRange(
+      issues,
+      `${path}.options[${optionIndex}]`,
+      "Distractor DeltaE00",
+      deltaE00,
+      profile.distractorDeltaE00
+    );
+  }
+}
+
 function validatePack(
   issues: ContentValidationIssue[],
   pack: ChallengePackDefinition,
@@ -501,7 +668,7 @@ function validatePack(
 
   const seenIds = new Set<string>();
   const difficultyCounts: Record<ChallengeDifficulty, number> = { easy: 0, medium: 0, hard: 0 };
-  const modeCounts: Record<ChallengeMode, number> = { solve: 0, predict: 0 };
+  const modeCounts: Record<ChallengeMode, number> = { solve: 0, predict: 0, discriminate: 0 };
   let previousDifficultyOrder = -1;
   let consecutiveModeCount = 0;
   let previousMode: ChallengeMode | null = null;
@@ -667,8 +834,30 @@ export function validateGameContent(content: GameContentDefinition): ContentVali
     validatePredictChallenge(issues, challenge, index, pigmentIds, pigmentById);
   }
 
+  const discriminateIds = new Set<string>();
+
+  for (const [index, challenge] of content.discriminateChallenges.entries()) {
+
+    if (discriminateIds.has(challenge.id)) {
+      addIssue(
+        issues,
+        `discriminateChallenges[${index}].id`,
+        `Duplicate discriminate challenge id '${challenge.id}'.`
+      );
+    }
+
+    discriminateIds.add(challenge.id);
+    if (isChallengeDifficulty(challenge.difficulty)) {
+      challengeMetadataById.set(challenge.id, {
+        mode: "discriminate",
+        difficulty: challenge.difficulty
+      });
+    }
+    validateDiscriminateChallenge(issues, challenge, index);
+  }
+
   if (content.packs) {
-    const allChallengeIds = new Set<string>([...solveIds, ...predictIds]);
+    const allChallengeIds = new Set<string>([...solveIds, ...predictIds, ...discriminateIds]);
     const packIds = new Set<string>();
 
     for (const [index, pack] of content.packs.entries()) {

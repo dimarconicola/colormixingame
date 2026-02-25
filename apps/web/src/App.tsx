@@ -2,6 +2,14 @@ import { rgbToHex, type PerceptualMatchScore } from "@colormix/color-engine";
 import { MixCanvas } from "@colormix/mix-canvas";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  DISCRIMINATE_CHALLENGES,
+  evaluateDiscriminateAttempt,
+  getDiscriminateContextPresentation,
+  selectNextDiscriminateChallenge,
+  type DiscriminateAttemptResult,
+  type DiscriminateChallenge
+} from "./discriminate";
+import {
   PREDICT_CHALLENGES,
   evaluatePredictAttempt,
   formatFormulaEntry,
@@ -23,9 +31,10 @@ import {
   type SolvePigmentId
 } from "./solve";
 
-type GameMode = "solve" | "predict";
+type GameMode = "solve" | "predict" | "discriminate";
 type SolvePhase = "landing" | "mixing" | "result";
 type PredictPhase = "landing" | "guessing" | "result";
+type DiscriminatePhase = "landing" | "guessing" | "result";
 
 export function App() {
   const canvasHostRef = useRef<HTMLDivElement | null>(null);
@@ -47,6 +56,13 @@ export function App() {
   const [predictSelectedOptionId, setPredictSelectedOptionId] = useState<string | null>(null);
   const [predictResult, setPredictResult] = useState<PredictAttemptResult | null>(null);
 
+  const [discriminatePhase, setDiscriminatePhase] = useState<DiscriminatePhase>("landing");
+  const [discriminateChallenge, setDiscriminateChallenge] = useState<DiscriminateChallenge>(() =>
+    selectNextDiscriminateChallenge(DISCRIMINATE_CHALLENGES)
+  );
+  const [discriminateSelectedOptionId, setDiscriminateSelectedOptionId] = useState<string | null>(null);
+  const [discriminateResult, setDiscriminateResult] = useState<DiscriminateAttemptResult | null>(null);
+
   const attemptColor = useMemo(() => getAttemptColorFromDrops(droppedPigments), [droppedPigments]);
   const attemptHex = attemptColor ? rgbToHex(attemptColor) : "#f0ebe0";
   const dropCounts = useMemo(() => countDropsByPigment(droppedPigments), [droppedPigments]);
@@ -61,6 +77,20 @@ export function App() {
         ? predictChallenge.options.find((option) => option.id === predictSelectedOptionId) ?? null
         : null,
     [predictChallenge.options, predictSelectedOptionId]
+  );
+
+  const discriminateSelectedOption = useMemo(
+    () =>
+      discriminateSelectedOptionId
+        ? discriminateChallenge.options.find((option) => option.id === discriminateSelectedOptionId) ??
+          null
+        : null,
+    [discriminateChallenge.options, discriminateSelectedOptionId]
+  );
+
+  const discriminateContext = useMemo(
+    () => getDiscriminateContextPresentation(discriminateChallenge.contextVariant),
+    [discriminateChallenge.contextVariant]
   );
 
   useEffect(() => {
@@ -194,16 +224,55 @@ export function App() {
     setPredictPhase("result");
   };
 
+  const startDiscriminateChallenge = () => {
+    setDiscriminateSelectedOptionId(null);
+    setDiscriminateResult(null);
+    setDiscriminatePhase("guessing");
+  };
+
+  const cycleDiscriminateChallenge = (nextPhase: DiscriminatePhase) => {
+    setDiscriminateChallenge((current) =>
+      selectNextDiscriminateChallenge(DISCRIMINATE_CHALLENGES, current.id)
+    );
+    setDiscriminateSelectedOptionId(null);
+    setDiscriminateResult(null);
+    setDiscriminatePhase(nextPhase);
+  };
+
+  const submitDiscriminateAttempt = () => {
+    if (!discriminateSelectedOptionId) {
+      return;
+    }
+
+    const evaluation = evaluateDiscriminateAttempt(discriminateChallenge, discriminateSelectedOptionId);
+
+    if (!evaluation) {
+      return;
+    }
+
+    setDiscriminateResult(evaluation);
+    setDiscriminatePhase("result");
+  };
+
   const modeDescription =
     mode === "solve"
       ? "Match the target swatch by dragging pigments into the bowl, then submit your mix for perceptual scoring using DeltaE00."
-      : "Predict the resulting swatch from a pigment formula, then verify your intuition with the same perceptual scoring model.";
+      : mode === "predict"
+        ? "Predict the resulting swatch from a pigment formula, then verify your intuition with the same perceptual scoring model."
+        : "Find the exact twin swatch under contextual perception variants where surrounding colors can bias your eye.";
 
   return (
     <main className="app-shell">
       <header className="hero">
         <p className="eyebrow">Color Mixing Game</p>
-        <h1>{mode === "solve" ? "Solve Mode" : "Predict Mode"} Vertical Slice</h1>
+        <h1>
+          {mode === "solve"
+            ? "Solve Mode"
+            : mode === "predict"
+              ? "Predict Mode"
+              : "Find the Twin Mode"}{" "}
+          Vertical Slice
+        </h1>
         <p>{modeDescription}</p>
 
         <div className="mode-switch" role="tablist" aria-label="Game mode switch">
@@ -224,6 +293,15 @@ export function App() {
             onClick={() => setMode("predict")}
           >
             Predict
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "discriminate"}
+            className={`mode-button ${mode === "discriminate" ? "active" : ""}`}
+            onClick={() => setMode("discriminate")}
+          >
+            Find the Twin
           </button>
         </div>
       </header>
@@ -617,6 +695,230 @@ export function App() {
                 setPredictPhase("landing");
                 setPredictSelectedOptionId(null);
                 setPredictResult(null);
+              }}
+            >
+              Back to Lobby
+            </button>
+          </div>
+        </section>
+      )}
+
+      {mode === "discriminate" && discriminatePhase === "landing" && (
+        <section className="board board-intro">
+          <div className="intro-main">
+            <h2>{discriminateChallenge.title}</h2>
+            <p>{discriminateChallenge.brief}</p>
+
+            <p className="challenge-meta">
+              Difficulty: {discriminateChallenge.difficulty.toUpperCase()} | Context:{" "}
+              {discriminateContext.title}
+            </p>
+
+            <div className="action-row">
+              <button type="button" className="button button-primary" onClick={startDiscriminateChallenge}>
+                Start Twin Hunt
+              </button>
+              <button
+                type="button"
+                className="button button-secondary"
+                onClick={() => cycleDiscriminateChallenge("landing")}
+              >
+                New Challenge
+              </button>
+            </div>
+          </div>
+
+          <aside className="intro-side">
+            <h3>Context Variant</h3>
+            <p>{discriminateContext.description}</p>
+            <div className="context-preview" style={{ background: discriminateContext.frameBackground }}>
+              <span
+                className="target-swatch large"
+                style={{ backgroundColor: discriminateChallenge.targetHex }}
+              />
+              <span>{discriminateChallenge.targetHex}</span>
+            </div>
+          </aside>
+        </section>
+      )}
+
+      {mode === "discriminate" && discriminatePhase === "guessing" && (
+        <section className="board board-discriminate">
+          <div className="predict-main">
+            <h2>{discriminateChallenge.title}</h2>
+            <p>{discriminateChallenge.brief}</p>
+
+            <p className="challenge-meta">
+              Difficulty: {discriminateChallenge.difficulty.toUpperCase()} | Context:{" "}
+              {discriminateContext.title}
+            </p>
+
+            <h3 className="section-label">Target</h3>
+            <div className="context-preview" style={{ background: discriminateContext.frameBackground }}>
+              <div
+                className="context-panel"
+                style={{ background: discriminateContext.panelBackground }}
+              >
+                <span
+                  className="target-swatch large"
+                  style={{ backgroundColor: discriminateChallenge.targetHex }}
+                />
+                <span>{discriminateChallenge.targetHex}</span>
+              </div>
+            </div>
+
+            <h3 className="section-label">Choose the exact twin</h3>
+            <div className="option-grid" role="radiogroup" aria-label="Discriminate options">
+              {discriminateChallenge.options.map((option, index) => {
+                const isSelected = option.id === discriminateSelectedOptionId;
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    className={`option-card ${isSelected ? "selected" : ""}`}
+                    onClick={() => setDiscriminateSelectedOptionId(option.id)}
+                    style={{ background: discriminateContext.panelBackground }}
+                  >
+                    <span className="option-token">Option {String.fromCharCode(65 + index)}</span>
+                    <span className="target-swatch large" style={{ backgroundColor: option.hex }} />
+                    <span>{option.hex}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="action-row">
+              <button
+                type="button"
+                className="button button-primary"
+                onClick={submitDiscriminateAttempt}
+                disabled={!discriminateSelectedOptionId}
+              >
+                Submit Twin Pick
+              </button>
+              <button
+                type="button"
+                className="button button-secondary"
+                onClick={() => cycleDiscriminateChallenge("guessing")}
+              >
+                New Challenge
+              </button>
+              <button
+                type="button"
+                className="button button-ghost"
+                onClick={() => {
+                  setDiscriminatePhase("landing");
+                  setDiscriminateSelectedOptionId(null);
+                  setDiscriminateResult(null);
+                }}
+              >
+                Back to Lobby
+              </button>
+            </div>
+          </div>
+
+          <aside className="predict-side">
+            <h3>Current Selection</h3>
+            {discriminateSelectedOption ? (
+              <div className="selected-preview">
+                <div className="context-panel" style={{ background: discriminateContext.panelBackground }}>
+                  <span
+                    className="target-swatch large"
+                    style={{ backgroundColor: discriminateSelectedOption.hex }}
+                  />
+                </div>
+                <span>{discriminateSelectedOption.hex}</span>
+              </div>
+            ) : (
+              <p className="hint">Select the swatch that exactly matches the target.</p>
+            )}
+            <p className="hint">{discriminateContext.description}</p>
+          </aside>
+        </section>
+      )}
+
+      {mode === "discriminate" && discriminatePhase === "result" && discriminateResult && (
+        <section className="board board-result">
+          <p className="eyebrow">Result</p>
+          <h2>{discriminateChallenge.title}</h2>
+          <p className={`status-pill ${discriminateResult.isCorrect ? "status-correct" : "status-wrong"}`}>
+            {discriminateResult.isCorrect ? "Exact Twin Found" : "Not the Twin"}
+          </p>
+          <p className={`band-pill band-${discriminateResult.perceptual.band}`}>
+            {formatBandLabel(discriminateResult.perceptual.band)}
+          </p>
+
+          <div className="result-stats">
+            <article>
+              <h3>Score</h3>
+              <p>{discriminateResult.perceptual.score}</p>
+            </article>
+            <article>
+              <h3>DeltaE00</h3>
+              <p>{discriminateResult.perceptual.deltaE00.toFixed(2)}</p>
+            </article>
+            <article>
+              <h3>Verdict</h3>
+              <p>{discriminateResult.isCorrect ? "Exact" : "Off-Tone"}</p>
+            </article>
+          </div>
+
+          <div className="result-swatches">
+            <div className="swatch-card" style={{ background: discriminateContext.panelBackground }}>
+              <span className="label">Target</span>
+              <span
+                className="target-swatch large"
+                style={{ backgroundColor: discriminateChallenge.targetHex }}
+              />
+              <span>{discriminateChallenge.targetHex}</span>
+            </div>
+            <div className="swatch-card" style={{ background: discriminateContext.panelBackground }}>
+              <span className="label">Your Pick</span>
+              <span
+                className="target-swatch large"
+                style={{ backgroundColor: discriminateResult.selectedOption.hex }}
+              />
+              <span>{discriminateResult.selectedOption.hex}</span>
+            </div>
+            <div className="swatch-card" style={{ background: discriminateContext.panelBackground }}>
+              <span className="label">Correct Twin</span>
+              <span
+                className="target-swatch large"
+                style={{ backgroundColor: discriminateResult.correctOption.hex }}
+              />
+              <span>{discriminateResult.correctOption.hex}</span>
+            </div>
+          </div>
+
+          <div className="action-row">
+            <button
+              type="button"
+              className="button button-primary"
+              onClick={() => {
+                setDiscriminateSelectedOptionId(null);
+                setDiscriminateResult(null);
+                setDiscriminatePhase("guessing");
+              }}
+            >
+              Retry Same Challenge
+            </button>
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => cycleDiscriminateChallenge("guessing")}
+            >
+              Next Challenge
+            </button>
+            <button
+              type="button"
+              className="button button-ghost"
+              onClick={() => {
+                setDiscriminatePhase("landing");
+                setDiscriminateSelectedOptionId(null);
+                setDiscriminateResult(null);
               }}
             >
               Back to Lobby

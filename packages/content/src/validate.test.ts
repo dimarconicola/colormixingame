@@ -67,4 +67,30 @@ describe("validateGameContent", () => {
       issues.some((issue) => issue.message.includes("difficulty progression must be non-decreasing"))
     ).toBe(true);
   });
+
+  it("reports discriminate challenge when correct option is not the twin", () => {
+    const invalidContent = {
+      ...DEFAULT_GAME_CONTENT,
+      discriminateChallenges: [
+        {
+          ...DEFAULT_GAME_CONTENT.discriminateChallenges[0],
+          options: [
+            { r: 208, g: 120, b: 122 },
+            { r: 244, g: 151, b: 126 },
+            { r: 222, g: 110, b: 84 },
+            { r: 220, g: 114, b: 86 }
+          ]
+        },
+        ...DEFAULT_GAME_CONTENT.discriminateChallenges.slice(1)
+      ]
+    };
+
+    const issues = validateGameContent(invalidContent);
+
+    expect(
+      issues.some((issue) =>
+        issue.message.includes("configured correct option must be perceptually identical")
+      )
+    ).toBe(true);
+  });
 });

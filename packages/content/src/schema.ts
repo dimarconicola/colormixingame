@@ -17,6 +17,8 @@ export type FormulaEntryDefinition = {
 
 export type ChallengeDifficulty = "easy" | "medium" | "hard";
 
+export type DiscriminateContextVariant = "neutral-studio" | "warm-gallery" | "cool-shadow";
+
 export type SolveChallengeDefinition = {
   id: string;
   title: string;
@@ -37,6 +39,17 @@ export type PredictChallengeDefinition = {
   correctOptionSlot: number;
 };
 
+export type DiscriminateChallengeDefinition = {
+  id: string;
+  title: string;
+  brief: string;
+  difficulty: ChallengeDifficulty;
+  contextVariant: DiscriminateContextVariant;
+  target: ContentRgbColor;
+  options: readonly ContentRgbColor[];
+  correctOptionSlot: number;
+};
+
 export type ChallengePackDefinition = {
   id: string;
   title: string;
@@ -48,6 +61,7 @@ export type GameContentDefinition = {
   pigments: readonly PigmentDefinition[];
   solveChallenges: readonly SolveChallengeDefinition[];
   predictChallenges: readonly PredictChallengeDefinition[];
+  discriminateChallenges: readonly DiscriminateChallengeDefinition[];
   packs?: readonly ChallengePackDefinition[];
 };
 

@@ -148,6 +148,24 @@ code {
   gap: 0.4rem;
 }
 
+.context-preview {
+  border-radius: 14px;
+  border: 1px solid #ddd5c6;
+  padding: 0.6rem;
+  display: inline-grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.context-panel {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.45rem;
+  display: inline-grid;
+  gap: 0.35rem;
+  justify-items: start;
+}
+
 .palette-list,
 .drop-breakdown,
 .formula-list {
@@ -285,6 +303,12 @@ code {
   grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
 }
 
+.board-discriminate {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+}
+
 .option-grid {
   display: grid;
   gap: 0.6rem;
@@ -387,7 +411,8 @@ code {
 @media (max-width: 900px) {
   .board-intro,
   .board-mixing,
-  .board-predict {
+  .board-predict,
+  .board-discriminate {
     grid-template-columns: 1fr;
   }
 

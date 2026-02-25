@@ -76,3 +76,12 @@ Template:
 - Decision: Add explicit challenge difficulty tiers (`easy`, `medium`, `hard`) and enforce pack-balance constraints in content validation: non-decreasing difficulty order, solve/predict mode mix, starter-tier coverage targets, and perceptual distractor separation checks for predict challenges.
 - Alternatives considered: manual difficulty labels without validation; validating only challenge existence/duplicates inside packs.
 - Consequences: more reliable progression quality as content grows, with measurable balancing guardrails; future pack authoring must satisfy these constraints or tune rule bands intentionally.
+
+## ADR-008
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-010 needed a Discriminate mode implementation that keeps challenge content scalable and objectively testable, including contextual perception effects.
+- Decision: Add `discriminateChallenges` to `@colormix/content` with explicit context variants (`neutral-studio`, `warm-gallery`, `cool-shadow`) and enforce validation rules for twin correctness and distractor perceptual bands by difficulty. Implement web-mode logic in a dedicated `discriminate.ts` module reused by the app shell.
+- Alternatives considered: inline discriminate challenge data in `App.tsx`; context variants only in UI without content validation constraints.
+- Consequences: stronger long-term maintainability and consistency across modes, with measurable discrimination difficulty; future challenge authoring must satisfy perceptual band constraints or intentionally adjust the validation profiles.

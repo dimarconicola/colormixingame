@@ -161,6 +161,53 @@ export const DEFAULT_GAME_CONTENT = {
       correctOptionSlot: 0
     }
   ],
+  discriminateChallenges: [
+    {
+      id: "twin-coral-sunset",
+      title: "Coral Sunset Twin",
+      brief: "Find the exact coral target among warm near-matches.",
+      difficulty: "easy",
+      contextVariant: "warm-gallery",
+      target: { r: 232, g: 128, b: 103 },
+      options: [
+        { r: 208, g: 120, b: 122 },
+        { r: 244, g: 151, b: 126 },
+        { r: 232, g: 128, b: 103 },
+        { r: 222, g: 110, b: 84 }
+      ],
+      correctOptionSlot: 2
+    },
+    {
+      id: "twin-sage-field",
+      title: "Sage Field Twin",
+      brief: "Pick the exact sage swatch while value and hue shifts are subtle.",
+      difficulty: "medium",
+      contextVariant: "neutral-studio",
+      target: { r: 114, g: 157, b: 118 },
+      options: [
+        { r: 121, g: 160, b: 113 },
+        { r: 114, g: 157, b: 118 },
+        { r: 104, g: 147, b: 126 },
+        { r: 107, g: 153, b: 121 }
+      ],
+      correctOptionSlot: 1
+    },
+    {
+      id: "twin-lilac-mist",
+      title: "Lilac Mist Twin",
+      brief: "Identify the exact muted lilac in a cool ambient context.",
+      difficulty: "hard",
+      contextVariant: "cool-shadow",
+      target: { r: 164, g: 154, b: 172 },
+      options: [
+        { r: 162, g: 152, b: 169 },
+        { r: 164, g: 154, b: 172 },
+        { r: 160, g: 150, b: 170 },
+        { r: 168, g: 156, b: 175 }
+      ],
+      correctOptionSlot: 1
+    }
+  ],
   packs: [
     {
       id: "starter-essentials",
