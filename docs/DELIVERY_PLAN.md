@@ -8,6 +8,12 @@ This plan is intentionally detailed on architecture and quality, while keeping f
 2. V1 prioritizes interaction quality over content volume.
 3. Web delivery is primary; iPad packaging is planned but optional for V1.
 
+## 1.1 Current Snapshot (2026-02-25)
+
+1. M0-M3 core scope is functionally in place with four playable mode vertical slices (`Solve`, `Predict`, `Discriminate`, `Collect`).
+2. Current focus is M4 quality hardening, starting with `B-012` (sound/motion polish) and `B-015` (baseline end-to-end flow coverage).
+3. M5 iPad packaging remains optional and should start only after M4 quality gates are stable.
+
 ## 2. Release Strategy
 
 1. `Milestone M0`: Documentation and project bootstrap.
@@ -170,4 +176,3 @@ A feature is done only if:
 1. Backlog update: weekly minimum or after major decisions.
 2. Plan update: at each milestone boundary.
 3. README refresh: whenever scope or architecture changes.
-

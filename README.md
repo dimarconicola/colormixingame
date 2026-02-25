@@ -60,10 +60,11 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 6. Solve mode vertical slice in `apps/web`: challenge lobby, active mix flow, and scored result screen.
 7. Predict mode vertical slice in `apps/web`: formula-driven multiple-choice round and scored results.
 8. Find the Twin (`Discriminate`) mode vertical slice in `apps/web`: contextual perception challenge flow with twin selection and scored results.
-9. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
-10. Curated starter pack balancing: challenge difficulty tiers (`easy`/`medium`/`hard`) and validation rules for progression, mode mix, and perceptual distractor spacing.
-11. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-12. CI: GitHub Actions pipeline for lint/typecheck/test/content validation/build.
+9. Color Diary (`Collect`) mode vertical slice in `apps/web`: local-first save/edit/delete flow, filter/sort/search controls, and collection wall UI.
+10. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
+11. Curated starter pack balancing: challenge difficulty tiers (`easy`/`medium`/`hard`) and validation rules for progression, mode mix, and perceptual distractor spacing.
+12. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
+13. CI: GitHub Actions pipeline for lint/typecheck/test/content validation/build.
 
 ## Repository Layout
 
@@ -150,10 +151,10 @@ Current repository state:
 3. Initial web app shell and shared package skeletons are implemented.
 4. `mix-canvas` supports pointer-driven drag/drop with bowl drop events.
 5. `color-engine` now includes perceptual color scoring via `DeltaE00` and calibrated quality bands.
-6. Solve, Predict, and Find the Twin mode vertical slices are implemented in `apps/web`.
+6. Solve, Predict, Find the Twin, and Color Diary mode vertical slices are implemented in `apps/web`.
 7. Challenge content schema and validation pipeline are implemented in `@colormix/content` and wired into CI.
 8. First curated starter challenge pack + balancing pass is implemented in `@colormix/content`.
-9. Next implementation focus is Color Diary mode.
+9. Current implementation focus is M4 polish (`B-012`) and coverage hardening (`B-015`) before optional packaging work.
 
 ## Source Notes
 

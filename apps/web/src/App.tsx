@@ -10,6 +10,20 @@ import {
   type DiscriminateChallenge
 } from "./discriminate";
 import {
+  createDiaryEntryFromDiscriminate,
+  createDiaryEntryFromPredict,
+  createDiaryEntryFromSolve,
+  prependDiaryEntry,
+  readDiaryEntries,
+  removeDiaryEntry,
+  selectDiaryEntries,
+  updateDiaryEntry,
+  writeDiaryEntries,
+  type DiaryEntry,
+  type DiaryFilterMode,
+  type DiarySort
+} from "./diary";
+import {
   PREDICT_CHALLENGES,
   evaluatePredictAttempt,
   formatFormulaEntry,
@@ -31,7 +45,7 @@ import {
   type SolvePigmentId
 } from "./solve";
 
-type GameMode = "solve" | "predict" | "discriminate";
+type GameMode = "solve" | "predict" | "discriminate" | "collect";
 type SolvePhase = "landing" | "mixing" | "result";
 type PredictPhase = "landing" | "guessing" | "result";
 type DiscriminatePhase = "landing" | "guessing" | "result";
@@ -63,6 +77,14 @@ export function App() {
   const [discriminateSelectedOptionId, setDiscriminateSelectedOptionId] = useState<string | null>(null);
   const [discriminateResult, setDiscriminateResult] = useState<DiscriminateAttemptResult | null>(null);
 
+  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
+  const [diaryFilterMode, setDiaryFilterMode] = useState<DiaryFilterMode>("all");
+  const [diarySort, setDiarySort] = useState<DiarySort>("newest");
+  const [diarySearchQuery, setDiarySearchQuery] = useState("");
+  const [selectedDiaryEntryId, setSelectedDiaryEntryId] = useState<string | null>(null);
+  const [diaryDraftTitle, setDiaryDraftTitle] = useState("");
+  const [diaryDraftNote, setDiaryDraftNote] = useState("");
+
   const attemptColor = useMemo(() => getAttemptColorFromDrops(droppedPigments), [droppedPigments]);
   const attemptHex = attemptColor ? rgbToHex(attemptColor) : "#f0ebe0";
   const dropCounts = useMemo(() => countDropsByPigment(droppedPigments), [droppedPigments]);
@@ -92,6 +114,36 @@ export function App() {
     () => getDiscriminateContextPresentation(discriminateChallenge.contextVariant),
     [discriminateChallenge.contextVariant]
   );
+
+  const visibleDiaryEntries = useMemo(
+    () =>
+      selectDiaryEntries(diaryEntries, {
+        filterMode: diaryFilterMode,
+        sort: diarySort,
+        searchQuery: diarySearchQuery
+      }),
+    [diaryEntries, diaryFilterMode, diarySort, diarySearchQuery]
+  );
+
+  const selectedDiaryEntry = useMemo(
+    () => diaryEntries.find((entry) => entry.id === selectedDiaryEntryId) ?? null,
+    [diaryEntries, selectedDiaryEntryId]
+  );
+
+  useEffect(() => {
+    if (visibleDiaryEntries.length === 0) {
+      setSelectedDiaryEntryId(null);
+      return;
+    }
+
+    setSelectedDiaryEntryId((current) => {
+      if (current && visibleDiaryEntries.some((entry) => entry.id === current)) {
+        return current;
+      }
+
+      return visibleDiaryEntries[0]?.id ?? null;
+    });
+  }, [visibleDiaryEntries]);
 
   useEffect(() => {
     if (mode !== "solve" || solvePhase !== "mixing") {
@@ -164,6 +216,35 @@ export function App() {
       mixCanvas.destroy();
     };
   }, [mode, solvePhase, solveChallenge, solveSessionKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const entries = readDiaryEntries(window.localStorage);
+    setDiaryEntries(entries);
+    setSelectedDiaryEntryId(entries[0]?.id ?? null);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    writeDiaryEntries(diaryEntries, window.localStorage);
+  }, [diaryEntries]);
+
+  useEffect(() => {
+    if (!selectedDiaryEntry) {
+      setDiaryDraftTitle("");
+      setDiaryDraftNote("");
+      return;
+    }
+
+    setDiaryDraftTitle(selectedDiaryEntry.title);
+    setDiaryDraftNote(selectedDiaryEntry.note);
+  }, [selectedDiaryEntry]);
 
   const startSolveChallenge = () => {
     setDroppedPigments([]);
@@ -254,12 +335,82 @@ export function App() {
     setDiscriminatePhase("result");
   };
 
+  const addDiaryEntry = (entry: DiaryEntry) => {
+    setDiaryEntries((current) => prependDiaryEntry(current, entry));
+    setSelectedDiaryEntryId(entry.id);
+    setMode("collect");
+  };
+
+  const saveSolveResultToDiary = () => {
+    if (!solveResult) {
+      return;
+    }
+
+    addDiaryEntry(
+      createDiaryEntryFromSolve({
+        challenge: solveChallenge,
+        droppedPigments,
+        attemptHex,
+        result: solveResult
+      })
+    );
+  };
+
+  const savePredictResultToDiary = () => {
+    if (!predictResult) {
+      return;
+    }
+
+    addDiaryEntry(
+      createDiaryEntryFromPredict({
+        challenge: predictChallenge,
+        result: predictResult
+      })
+    );
+  };
+
+  const saveDiscriminateResultToDiary = () => {
+    if (!discriminateResult) {
+      return;
+    }
+
+    addDiaryEntry(
+      createDiaryEntryFromDiscriminate({
+        challenge: discriminateChallenge,
+        result: discriminateResult
+      })
+    );
+  };
+
+  const saveDiaryDraft = () => {
+    if (!selectedDiaryEntry) {
+      return;
+    }
+
+    setDiaryEntries((current) =>
+      updateDiaryEntry(current, selectedDiaryEntry.id, {
+        title: diaryDraftTitle,
+        note: diaryDraftNote
+      })
+    );
+  };
+
+  const deleteSelectedDiaryEntry = () => {
+    if (!selectedDiaryEntry) {
+      return;
+    }
+
+    setDiaryEntries((current) => removeDiaryEntry(current, selectedDiaryEntry.id));
+  };
+
   const modeDescription =
     mode === "solve"
       ? "Match the target swatch by dragging pigments into the bowl, then submit your mix for perceptual scoring using DeltaE00."
       : mode === "predict"
         ? "Predict the resulting swatch from a pigment formula, then verify your intuition with the same perceptual scoring model."
-        : "Find the exact twin swatch under contextual perception variants where surrounding colors can bias your eye.";
+        : mode === "discriminate"
+          ? "Find the exact twin swatch under contextual perception variants where surrounding colors can bias your eye."
+          : "Review and edit your saved swatches, formulas, and notes in a local-first color diary.";
 
   return (
     <main className="app-shell">
@@ -270,7 +421,9 @@ export function App() {
             ? "Solve Mode"
             : mode === "predict"
               ? "Predict Mode"
-              : "Find the Twin Mode"}{" "}
+              : mode === "discriminate"
+                ? "Find the Twin Mode"
+                : "Color Diary"}{" "}
           Vertical Slice
         </h1>
         <p>{modeDescription}</p>
@@ -302,6 +455,15 @@ export function App() {
             onClick={() => setMode("discriminate")}
           >
             Find the Twin
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "collect"}
+            className={`mode-button ${mode === "collect" ? "active" : ""}`}
+            onClick={() => setMode("collect")}
+          >
+            Color Diary
           </button>
         </div>
       </header>
@@ -476,6 +638,9 @@ export function App() {
               onClick={() => cycleSolveChallenge("mixing")}
             >
               Next Challenge
+            </button>
+            <button type="button" className="button button-secondary" onClick={saveSolveResultToDiary}>
+              Save to Diary
             </button>
             <button
               type="button"
@@ -687,6 +852,9 @@ export function App() {
               onClick={() => cyclePredictChallenge("guessing")}
             >
               Next Formula
+            </button>
+            <button type="button" className="button button-secondary" onClick={savePredictResultToDiary}>
+              Save to Diary
             </button>
             <button
               type="button"
@@ -914,6 +1082,13 @@ export function App() {
             </button>
             <button
               type="button"
+              className="button button-secondary"
+              onClick={saveDiscriminateResultToDiary}
+            >
+              Save to Diary
+            </button>
+            <button
+              type="button"
               className="button button-ghost"
               onClick={() => {
                 setDiscriminatePhase("landing");
@@ -924,6 +1099,136 @@ export function App() {
               Back to Lobby
             </button>
           </div>
+        </section>
+      )}
+
+      {mode === "collect" && (
+        <section className="board board-diary">
+          <div className="diary-main">
+            <h2>Color Diary</h2>
+            <p>Save and organize your favorite outcomes from Solve, Predict, and Find the Twin.</p>
+
+            <div className="diary-toolbar">
+              <label>
+                Mode
+                <select
+                  value={diaryFilterMode}
+                  onChange={(event) => setDiaryFilterMode(event.target.value as DiaryFilterMode)}
+                >
+                  <option value="all">All</option>
+                  <option value="solve">Solve</option>
+                  <option value="predict">Predict</option>
+                  <option value="discriminate">Find the Twin</option>
+                </select>
+              </label>
+
+              <label>
+                Sort
+                <select
+                  value={diarySort}
+                  onChange={(event) => setDiarySort(event.target.value as DiarySort)}
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                </select>
+              </label>
+
+              <label className="grow">
+                Search
+                <input
+                  type="search"
+                  value={diarySearchQuery}
+                  onChange={(event) => setDiarySearchQuery(event.target.value)}
+                  placeholder="Search title, note, hex, summary"
+                />
+              </label>
+            </div>
+
+            {visibleDiaryEntries.length === 0 ? (
+              <p className="hint">
+                Diary is empty for this filter. Save any result screen to start your collection wall.
+              </p>
+            ) : (
+              <ul className="diary-grid">
+                {visibleDiaryEntries.map((entry) => {
+                  const isSelected = entry.id === selectedDiaryEntryId;
+
+                  return (
+                    <li key={entry.id}>
+                      <button
+                        type="button"
+                        className={`diary-card ${isSelected ? "selected" : ""}`}
+                        onClick={() => setSelectedDiaryEntryId(entry.id)}
+                      >
+                        <span className="target-swatch large" style={{ backgroundColor: entry.swatchHex }} />
+                        <strong>{entry.title}</strong>
+                        <span className="diary-meta">
+                          {entry.sourceMode} | {new Date(entry.createdAt).toLocaleDateString()}
+                        </span>
+                        <span className="diary-meta">{entry.swatchHex}</span>
+                        <span className="diary-summary">{entry.summary}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          <aside className="diary-side">
+            {selectedDiaryEntry ? (
+              <>
+                <h3>Edit Entry</h3>
+                <p className="hint">
+                  Created {new Date(selectedDiaryEntry.createdAt).toLocaleString()} | Updated{" "}
+                  {new Date(selectedDiaryEntry.updatedAt).toLocaleString()}
+                </p>
+
+                <div className="selected-preview">
+                  <span
+                    className="target-swatch large"
+                    style={{ backgroundColor: selectedDiaryEntry.swatchHex }}
+                  />
+                  <span>{selectedDiaryEntry.swatchHex}</span>
+                </div>
+
+                <label>
+                  Title
+                  <input
+                    type="text"
+                    value={diaryDraftTitle}
+                    onChange={(event) => setDiaryDraftTitle(event.target.value)}
+                  />
+                </label>
+
+                <label>
+                  Note
+                  <textarea
+                    rows={6}
+                    value={diaryDraftNote}
+                    onChange={(event) => setDiaryDraftNote(event.target.value)}
+                    placeholder="Add your recipe note, comparison thought, or reminder."
+                  />
+                </label>
+
+                <p className="hint">{selectedDiaryEntry.summary}</p>
+
+                <div className="action-row">
+                  <button type="button" className="button button-primary" onClick={saveDiaryDraft}>
+                    Save Changes
+                  </button>
+                  <button type="button" className="button button-ghost" onClick={deleteSelectedDiaryEntry}>
+                    Delete Entry
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3>Entry Details</h3>
+                <p className="hint">Select a diary card to edit title and notes.</p>
+              </>
+            )}
+          </aside>
         </section>
       )}
     </main>

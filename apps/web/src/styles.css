@@ -309,6 +309,106 @@ code {
   grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
 }
 
+.board-diary {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+}
+
+.diary-main,
+.diary-side {
+  border-radius: 16px;
+  border: 1px solid #ece5d8;
+  background: #fffdfa;
+  padding: 0.9rem;
+}
+
+.diary-main {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.diary-side {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+}
+
+.diary-toolbar {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.diary-toolbar .grow {
+  grid-column: span 1;
+}
+
+.diary-toolbar label,
+.diary-side label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #555c69;
+}
+
+.diary-toolbar select,
+.diary-toolbar input,
+.diary-side input,
+.diary-side textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #ddd5c6;
+  background: #ffffff;
+  color: #1c1d1f;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+}
+
+.diary-side textarea {
+  resize: vertical;
+}
+
+.diary-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.diary-card {
+  width: 100%;
+  border: 1px solid #e6decd;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.32rem;
+  justify-items: start;
+  text-align: left;
+  cursor: pointer;
+}
+
+.diary-card.selected {
+  border-color: #1f7566;
+  box-shadow: 0 0 0 2px rgba(31, 117, 102, 0.2);
+}
+
+.diary-meta {
+  color: #596070;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.diary-summary {
+  color: #3e434b;
+  font-size: 0.84rem;
+}
+
 .option-grid {
   display: grid;
   gap: 0.6rem;
@@ -412,14 +512,20 @@ code {
   .board-intro,
   .board-mixing,
   .board-predict,
-  .board-discriminate {
+  .board-discriminate,
+  .board-diary {
     grid-template-columns: 1fr;
   }
 
   .swatch-grid,
   .result-swatches,
   .result-stats,
-  .option-grid {
+  .option-grid,
+  .diary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diary-toolbar {
     grid-template-columns: 1fr;
   }
 }

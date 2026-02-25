@@ -85,3 +85,12 @@ Template:
 - Decision: Add `discriminateChallenges` to `@colormix/content` with explicit context variants (`neutral-studio`, `warm-gallery`, `cool-shadow`) and enforce validation rules for twin correctness and distractor perceptual bands by difficulty. Implement web-mode logic in a dedicated `discriminate.ts` module reused by the app shell.
 - Alternatives considered: inline discriminate challenge data in `App.tsx`; context variants only in UI without content validation constraints.
 - Consequences: stronger long-term maintainability and consistency across modes, with measurable discrimination difficulty; future challenge authoring must satisfy perceptual band constraints or intentionally adjust the validation profiles.
+
+## ADR-009
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-011 needed a Collect/Diary loop that works offline immediately and can capture outcomes from all gameplay modes without backend coupling.
+- Decision: Implement a local-first diary model in `apps/web/src/diary.ts`, persist entries in browser `localStorage` (`colormix.diary.v1`), and expose mode-agnostic entry builders plus filter/sort/search selection helpers for UI reuse.
+- Alternatives considered: postpone diary until cloud sync exists; embed diary mutations directly inside `App.tsx` without domain helpers.
+- Consequences: fast, resilient offline retention loop with testable domain logic today; future cloud sync work must include migration/versioning strategy for locally persisted diary entries.
