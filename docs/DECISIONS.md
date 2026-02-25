@@ -94,3 +94,12 @@ Template:
 - Decision: Implement a local-first diary model in `apps/web/src/diary.ts`, persist entries in browser `localStorage` (`colormix.diary.v1`), and expose mode-agnostic entry builders plus filter/sort/search selection helpers for UI reuse.
 - Alternatives considered: postpone diary until cloud sync exists; embed diary mutations directly inside `App.tsx` without domain helpers.
 - Consequences: fast, resilient offline retention loop with testable domain logic today; future cloud sync work must include migration/versioning strategy for locally persisted diary entries.
+
+## ADR-010
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: B-015 required reliable end-to-end coverage for critical player journeys (mode switching and diary retention flow) beyond unit-level assertions.
+- Decision: Adopt Playwright as the baseline E2E framework, add a Chromium smoke suite under `tests/e2e`, and enforce execution in CI with explicit browser installation before test run.
+- Alternatives considered: keep only Vitest integration tests; defer E2E until post-polish milestone.
+- Consequences: stronger regression protection for cross-mode UI behavior and persistence interactions; CI runtime increases slightly and local contributors must install Playwright browsers to run E2E tests.

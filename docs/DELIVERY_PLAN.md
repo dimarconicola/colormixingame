@@ -11,7 +11,7 @@ This plan is intentionally detailed on architecture and quality, while keeping f
 ## 1.1 Current Snapshot (2026-02-25)
 
 1. M0-M3 core scope is functionally in place with four playable mode vertical slices (`Solve`, `Predict`, `Discriminate`, `Collect`).
-2. Current focus is M4 quality hardening, starting with `B-012` (sound/motion polish) and `B-015` (baseline end-to-end flow coverage).
+2. Current focus is M4 quality hardening, with `B-015` (baseline end-to-end flow coverage) completed and `B-012` (sound/motion polish) as the active next slice.
 3. M5 iPad packaging remains optional and should start only after M4 quality gates are stable.
 
 ## 2. Release Strategy

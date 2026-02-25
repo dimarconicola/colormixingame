@@ -64,7 +64,8 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 10. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
 11. Curated starter pack balancing: challenge difficulty tiers (`easy`/`medium`/`hard`) and validation rules for progression, mode mix, and perceptual distractor spacing.
 12. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-13. CI: GitHub Actions pipeline for lint/typecheck/test/content validation/build.
+13. Baseline E2E coverage: Playwright flow for mode switching and diary save/edit/delete.
+14. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
 
 ## Repository Layout
 
@@ -109,6 +110,7 @@ The web app runs from `apps/web` through the monorepo `dev` task.
 6. `pnpm content:validate` - run content schema/integrity validation.
 7. `pnpm format` - check formatting.
 8. `pnpm format:write` - write formatting fixes.
+9. `pnpm run test:e2e` - run Playwright Chromium baseline end-to-end flows.
 
 ## Delivery Plan
 
@@ -154,7 +156,7 @@ Current repository state:
 6. Solve, Predict, Find the Twin, and Color Diary mode vertical slices are implemented in `apps/web`.
 7. Challenge content schema and validation pipeline are implemented in `@colormix/content` and wired into CI.
 8. First curated starter challenge pack + balancing pass is implemented in `@colormix/content`.
-9. Current implementation focus is M4 polish (`B-012`) and coverage hardening (`B-015`) before optional packaging work.
+9. Current implementation focus is M4 polish (`B-012`) before optional packaging work.
 
 ## Source Notes
 
