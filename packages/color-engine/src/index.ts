@@ -1,13 +1,4 @@
-export type RgbColor = {
-  r: number;
-  g: number;
-  b: number;
-};
-
-export type WeightedColorInput = {
-  color: RgbColor;
-  weight: number;
-};
+import type { RgbColor, WeightedColorInput } from "./types";
 
 function clampChannel(value: number): number {
   return Math.max(0, Math.min(255, Math.round(value)));
@@ -52,3 +43,6 @@ export function rgbToHex(color: RgbColor): string {
 
   return `#${channels.join("")}`;
 }
+
+export * from "./perceptual";
+export type { RgbColor, WeightedColorInput };

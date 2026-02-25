@@ -32,3 +32,11 @@ Template:
 - Alternatives considered: HSV/RGB Euclidean approximations.
 - Consequences: better player trust and difficulty calibration; requires stronger test coverage and calibration tooling.
 
+## ADR-003
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: Perceptual scoring needed concrete implementation details for stable gameplay thresholds and mode balancing.
+- Decision: Implement CIEDE2000 (`DeltaE00`) in `@colormix/color-engine` and use initial acceptance bands at `1.0` (perfect), `2.2` (excellent), `4.0` (good), `8.0` (fair), else `miss`.
+- Alternatives considered: CIE76-only scoring, ad hoc RGB/HSV thresholding.
+- Consequences: stronger alignment with perceived differences and better calibration consistency; requires ongoing tuning against playtest data.

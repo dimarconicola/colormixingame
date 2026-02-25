@@ -56,8 +56,9 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 2. App shell: `React + Vite + TypeScript` under `apps/web`.
 3. Package boundaries: `color-engine`, `game-domain`, `mix-canvas`, `ui`, `content`.
 4. `mix-canvas` pointer interaction baseline: drag pigments into a bowl with callback events.
-5. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
-6. CI: GitHub Actions pipeline for lint/typecheck/test/build.
+5. `color-engine` perceptual scoring baseline: CIEDE2000 (`DeltaE00`) with calibrated acceptance bands.
+6. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest.
+7. CI: GitHub Actions pipeline for lint/typecheck/test/build.
 
 ## Repository Layout
 
@@ -142,7 +143,8 @@ Current repository state:
 2. Monorepo scaffold and CI baseline are implemented.
 3. Initial web app shell and shared package skeletons are implemented.
 4. `mix-canvas` now supports pointer-driven drag/drop with bowl drop events and a live demo in `apps/web`.
-5. Next implementation focus is perceptual scoring calibration and Solve mode vertical slice.
+5. `color-engine` now includes perceptual color scoring via `DeltaE00` and calibrated quality bands.
+6. Next implementation focus is Solve mode vertical slice and challenge schema design.
 
 ## Source Notes
 
