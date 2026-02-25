@@ -25,6 +25,10 @@ export function findTopmostCircleAtPoint<T extends Circle>(
   for (let index = circles.length - 1; index >= 0; index -= 1) {
     const circle = circles[index];
 
+    if (!circle) {
+      continue;
+    }
+
     if (isPointInCircle(point, circle)) {
       return circle;
     }
