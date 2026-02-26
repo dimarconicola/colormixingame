@@ -54,29 +54,16 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 1. Monorepo: `pnpm` workspaces + `Turborepo` task graph.
 2. App shell: `React + Vite + TypeScript` under `apps/web`.
-3. Package boundaries: `color-engine`, `game-domain`, `mix-canvas`, `ui`, `content`.
-4. `mix-canvas` pointer interaction baseline: drag pigments into a bowl with callback events.
-5. `color-engine` perceptual scoring baseline: CIEDE2000 (`DeltaE00`) with calibrated acceptance bands.
-6. Solve mode vertical slice in `apps/web`: challenge lobby, active mix flow, and scored result screen.
-7. Predict mode vertical slice in `apps/web`: formula-driven multiple-choice round and scored results.
-8. Find the Twin (`Discriminate`) mode vertical slice in `apps/web`: contextual perception challenge flow with twin selection and scored results.
-9. Color Diary (`Collect`) mode vertical slice in `apps/web`: local-first save/edit/delete flow, filter/sort/search controls, and collection wall UI.
-10. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
-11. Curated starter pack balancing: challenge difficulty tiers (`easy`/`medium`/`hard`) and validation rules for progression, mode mix, and perceptual distractor spacing.
-12. Sound and motion polish baseline: subtle Web Audio cues with user toggle + reduced-motion-safe transitions.
-13. Accessibility controls: persisted high-contrast mode and discriminate color-assist overlays.
-14. Color Diary retention upgrades: daily prompts plus JSON import/export with merge-safe ingestion.
-15. Content depth upgrade: second curated pack (`full-spectrum-lab`) and pack-aware challenge filtering in app.
-16. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest, Playwright.
-17. Baseline E2E coverage: mode switching, diary flow, guardian-gated delete path, and pack/accessibility controls.
-18. Optional iPad packaging track scaffolded with Capacitor config/scripts and runbook.
-19. Optional cloud sync architecture contracts in `@colormix/game-domain` + dedicated architecture doc.
-20. Content authoring toolkit: challenge/pack template APIs and CLI scaffolding in `@colormix/content`.
-21. Parent-gated diary actions for export/import/delete with temporary adult unlock window.
-22. Session wellbeing pass: persisted break reminders with timed modal prompts.
-23. Local-first session insights telemetry surfaced in Color Diary for quality tuning.
-24. Diary resilience hardening: dual-write backup key and fallback reads on corrupted primary payload.
-25. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
+3. Pixel-perfect `Chroma Mix` UI shell imported into `apps/web` from `chroma-mix_-color-adventure` using Tailwind v4 + Motion + Lucide.
+4. Package boundaries: `color-engine`, `game-domain`, `mix-canvas`, `ui`, `content`.
+5. `mix-canvas` pointer interaction baseline: drag pigments into a bowl with callback events.
+6. `color-engine` perceptual scoring baseline: CIEDE2000 (`DeltaE00`) with calibrated acceptance bands.
+7. `content` package baseline: typed challenge schema, curated default content, validation API, and CLI integrity check.
+8. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest, Playwright.
+9. Optional iPad packaging track scaffolded with Capacitor config/scripts and runbook.
+10. Optional cloud sync architecture contracts in `@colormix/game-domain` + dedicated architecture doc.
+11. Content authoring toolkit: challenge/pack template APIs and CLI scaffolding in `@colormix/content`.
+12. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
 
 ## Repository Layout
 
@@ -171,13 +158,12 @@ Current repository state:
 3. Initial web app shell and shared package skeletons are implemented.
 4. `mix-canvas` supports pointer-driven drag/drop with bowl drop events.
 5. `color-engine` now includes perceptual color scoring via `DeltaE00` and calibrated quality bands.
-6. Solve, Predict, Find the Twin, and Color Diary mode vertical slices are implemented in `apps/web`.
+6. Active `apps/web` runtime now mirrors the imported Chroma Mix design shell pixel-for-pixel.
 7. Challenge content schema and validation pipeline are implemented in `@colormix/content` and wired into CI.
-8. Two curated challenge packs and pack-aware challenge filtering are implemented.
-9. Sound/motion polish, accessibility controls, diary portability, and baseline E2E hardening are complete for M4.
-10. Research-driven trust and reliability pass is complete with guardian-gated diary actions, break reminders, session insights, and diary backup fallback.
-11. Optional iPad packaging and optional cloud-sync architecture tracks are scaffolded for post-V1 rollout.
-12. Content authoring toolkit baseline is available for scalable challenge/pack creation.
+8. Two curated challenge packs and pack-aware challenge filtering are available in repository modules.
+9. Trust/reliability modules (guardian gate, reminders, diary resilience, insights) remain in repository and test suite; re-integration into the new shell is tracked in backlog `B-031`.
+10. Optional iPad packaging and optional cloud-sync architecture tracks are scaffolded for post-V1 rollout.
+11. Content authoring toolkit baseline is available for scalable challenge/pack creation.
 
 ## Source Notes
 

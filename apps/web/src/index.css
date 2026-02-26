@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Fredoka", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-toca-bg: #E8F6F8;
+  --color-toca-yellow: #FFD166;
+  --color-toca-blue: #118AB2;
+  --color-toca-pink: #EF476F;
+  --color-toca-green: #06D6A0;
+  --color-toca-dark: #073B4C;
+  --color-toca-white: #FFFFFF;
+  --color-toca-orange: #F77F00;
+  --color-toca-purple: #8338EC;
+  
+  --shadow-chunky: 0px 12px 0px 0px rgba(7, 59, 76, 1);
+  --shadow-chunky-hover: 0px 6px 0px 0px rgba(7, 59, 76, 1);
+  --shadow-chunky-active: 0px 0px 0px 0px rgba(7, 59, 76, 1);
+}
+
+body {
+  background-color: var(--color-toca-bg);
+  background-image: radial-gradient(circle at 20px 20px, rgba(17, 138, 178, 0.1) 4px, transparent 0);
+  background-size: 60px 60px;
+  color: var(--color-toca-dark);
+  overflow-x: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toca-card {
+  @apply bg-white rounded-[40px] border-[6px] border-toca-dark shadow-[0_12px_0_0_#073B4C,0_24px_40px_rgba(7,59,76,0.15)] transition-transform duration-300;
+}
+
+.toca-button {
+  @apply relative inline-flex items-center justify-center font-black text-2xl rounded-[32px] border-[6px] border-toca-dark shadow-[0_8px_0_0_#073B4C,0_16px_20px_rgba(7,59,76,0.15)] transition-all duration-200 active:translate-y-[8px] active:shadow-[0_0px_0_0_#073B4C,0_0px_0px_rgba(7,59,76,0.15)] uppercase tracking-wider overflow-hidden;
+}
+
+.toca-button::after {
+  content: '';
+  @apply absolute top-0 left-0 w-full h-1/2 bg-white/20 rounded-t-[26px] pointer-events-none;
+}
+
+.toca-button-primary {
+  @apply bg-toca-pink text-white;
+}
+
+.toca-button-secondary {
+  @apply bg-toca-yellow text-toca-dark;
+}
+
+.toca-button-tertiary {
+  @apply bg-toca-green text-toca-dark;
+}
+
+.toca-pill {
+  @apply relative bg-white border-[6px] border-toca-dark rounded-full px-8 py-3 font-black text-xl shadow-[0_6px_0_0_#073B4C,0_12px_20px_rgba(7,59,76,0.1)] transition-all duration-200 active:translate-y-[6px] active:shadow-[0_0px_0_0_#073B4C] cursor-pointer uppercase tracking-wider overflow-hidden;
+}
+
+.toca-pill::after {
+  content: '';
+  @apply absolute top-0 left-0 w-full h-1/2 bg-white/40 pointer-events-none;
+}
+
+.toca-pill.active {
+  @apply bg-toca-dark text-white translate-y-[6px] shadow-[0_0px_0_0_#073B4C];
+}
+
+.toca-pill.active::after {
+  @apply bg-white/10;
+}
+
+/* Hide scrollbar for horizontal scroll areas */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(2deg); }
+  75% { transform: translateY(10px) rotate(-2deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(10px) rotate(-2deg); }
+  75% { transform: translateY(-10px) rotate(2deg); }
+}
+
+.animate-float-delayed {
+  animation: float-delayed 7s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.4); }
+  50% { box-shadow: 0 0 0 20px rgba(255, 209, 102, 0); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+.animate-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  animation: shine 3s infinite;
+  pointer-events: none;
+  z-index: 10;
+}
