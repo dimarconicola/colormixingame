@@ -8,6 +8,25 @@ async function resetStorage(page: import("@playwright/test").Page): Promise<void
   await page.reload();
 }
 
+async function completeGuardianGate(page: import("@playwright/test").Page): Promise<void> {
+  const challengeLine = page.getByText(/^Solve this quick check:/i);
+  await expect(challengeLine).toBeVisible();
+
+  const challengeText = (await challengeLine.textContent()) ?? "";
+  const match = challengeText.match(/(\d+)\s*\+\s*(\d+)/);
+
+  if (!match) {
+    throw new Error(`Guardian challenge text could not be parsed: "${challengeText}"`);
+  }
+
+  const left = Number(match[1]);
+  const right = Number(match[2]);
+  const answer = String(left + right);
+
+  await page.getByLabel("Answer").fill(answer);
+  await page.getByRole("button", { name: /Unlock for 10 Minutes/i }).click();
+}
+
 test.describe("mode switching and color diary", () => {
   test.beforeEach(async ({ page }) => {
     await resetStorage(page);
@@ -53,6 +72,7 @@ test.describe("mode switching and color diary", () => {
 
     await expect(page.getByRole("button", { name: new RegExp(updatedTitle, "i") })).toBeVisible();
     await page.getByRole("button", { name: "Delete Entry" }).click();
+    await completeGuardianGate(page);
 
     await expect(
       page.getByText("Diary is empty for this filter. Save any result screen to start your collection wall.")

@@ -32,7 +32,8 @@
 
 1. Local-first browser storage for diary and polish preferences.
 2. Versioned key strategy to support safe data migrations.
-3. Optional cloud-sync architecture defined for post-V1 rollout.
+3. Diary resilience strategy with primary + backup keys and fallback reads.
+4. Optional cloud-sync architecture defined for post-V1 rollout.
 
 ## 2.5 Tooling and Monorepo
 
@@ -156,8 +157,9 @@ Core entities:
 ## 9. Observability Strategy
 
 1. Local debug overlay for fps, frame time, and event traces.
-2. Development-only instrumentation hooks in key pipelines.
-3. Minimal production telemetry focused on quality and stability.
+2. Local-first session insights store (`mode starts/completions`, `diary actions`) for privacy-safe quality tuning.
+3. Development-only instrumentation hooks in key pipelines.
+4. Minimal production telemetry focused on quality and stability.
 
 ## 10. iPad Packaging Strategy (Later Phase)
 
@@ -188,8 +190,9 @@ Authoring guide: `docs/CONTENT_AUTHORING.md`.
 
 1. No ad/tracking SDKs in V1.
 2. Store only necessary local user data.
-3. Avoid collecting personal identifiers by default.
-4. Keep all telemetry first-party and documented.
+3. Guard adult-only actions (destructive/portability/outbound) with parent-gate patterns.
+4. Avoid collecting personal identifiers by default.
+5. Keep all telemetry first-party and documented.
 
 ## 14. ADR Process
 

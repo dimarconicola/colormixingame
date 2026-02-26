@@ -4,6 +4,7 @@ import type { PredictAttemptResult, PredictChallenge } from "./predict";
 import type { SolveChallenge, SolvePigmentId } from "./solve";
 
 export const DIARY_STORAGE_KEY = "colormix.diary.v1";
+export const DIARY_BACKUP_STORAGE_KEY = "colormix.diary.backup.v1";
 
 export type DiarySourceMode = "solve" | "predict" | "discriminate";
 
@@ -92,12 +93,19 @@ export function readDiaryEntries(storage: DiaryStorageLike | null | undefined): 
   }
 
   const rawValue = storage.getItem(DIARY_STORAGE_KEY);
+  const parsedEntries = rawValue ? parseDiaryEntries(rawValue) : [];
 
-  if (!rawValue) {
+  if (rawValue && (rawValue.trim() === "[]" || parsedEntries.length > 0)) {
+    return parsedEntries;
+  }
+
+  const backupRawValue = storage.getItem(DIARY_BACKUP_STORAGE_KEY);
+
+  if (!backupRawValue) {
     return [];
   }
 
-  return parseDiaryEntries(rawValue);
+  return parseDiaryEntries(backupRawValue);
 }
 
 export function writeDiaryEntries(
@@ -108,7 +116,10 @@ export function writeDiaryEntries(
     return;
   }
 
-  storage.setItem(DIARY_STORAGE_KEY, JSON.stringify(entries));
+  const serializedEntries = JSON.stringify(entries);
+
+  storage.setItem(DIARY_STORAGE_KEY, serializedEntries);
+  storage.setItem(DIARY_BACKUP_STORAGE_KEY, serializedEntries);
 }
 
 export function serializeDiaryEntries(entries: readonly DiaryEntry[]): string {

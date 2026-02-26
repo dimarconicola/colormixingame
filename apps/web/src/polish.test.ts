@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  BREAK_REMINDER_ENABLED_STORAGE_KEY,
   COLOR_ASSIST_STORAGE_KEY,
   HIGH_CONTRAST_STORAGE_KEY,
   SOUND_ENABLED_STORAGE_KEY,
+  parseBreakReminderEnabled,
   parseColorAssistEnabled,
   parseHighContrastEnabled,
   parseSoundEnabled,
+  readBreakReminderEnabled,
   readColorAssistEnabled,
   readHighContrastEnabled,
   readSoundEnabled,
+  writeBreakReminderEnabled,
   writeColorAssistEnabled,
   writeHighContrastEnabled,
   writeSoundEnabled
@@ -69,6 +73,8 @@ describe("parse contrast and assist preferences", () => {
     expect(parseHighContrastEnabled("0")).toBe(false);
     expect(parseColorAssistEnabled("true")).toBe(true);
     expect(parseColorAssistEnabled("false")).toBe(false);
+    expect(parseBreakReminderEnabled("1")).toBe(true);
+    expect(parseBreakReminderEnabled("false")).toBe(false);
   });
 });
 
@@ -99,5 +105,14 @@ describe("sound preference storage", () => {
     expect(storage.getItem(COLOR_ASSIST_STORAGE_KEY)).toBe("1");
     expect(readHighContrastEnabled(storage)).toBe(true);
     expect(readColorAssistEnabled(storage)).toBe(true);
+  });
+
+  it("reads and writes break reminder values", () => {
+    const storage = createStorageStub();
+
+    writeBreakReminderEnabled(true, storage);
+    expect(storage.getItem(BREAK_REMINDER_ENABLED_STORAGE_KEY)).toBe("1");
+    expect(readBreakReminderEnabled(storage)).toBe(true);
+    expect(parseBreakReminderEnabled("unknown")).toBe(false);
   });
 });

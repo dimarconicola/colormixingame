@@ -38,15 +38,33 @@ import {
 } from "./predict";
 import {
   createUiSoundPlayer,
+  readBreakReminderEnabled,
   readColorAssistEnabled,
   readHighContrastEnabled,
   readSoundEnabled,
+  writeBreakReminderEnabled,
   writeColorAssistEnabled,
   writeHighContrastEnabled,
   writeSoundEnabled,
   type SoundCue,
   type UiSoundPlayer
 } from "./polish";
+import {
+  GUARDIAN_UNLOCK_DURATION_MS,
+  createGuardianChallenge,
+  isGuardianUnlockActive,
+  verifyGuardianAnswer,
+  type GuardianChallenge
+} from "./guardian-gate";
+import {
+  createDefaultSessionInsights,
+  readSessionInsights,
+  recordDiaryAction,
+  recordModeCompletion,
+  recordModeStart,
+  writeSessionInsights,
+  type SessionInsights
+} from "./insights";
 import {
   SOLVE_CHALLENGES,
   countDropsByPigment,
@@ -72,6 +90,7 @@ type ChallengePackOption = {
 };
 
 const ALL_PACK_ID = "all";
+const BREAK_REMINDER_INTERVAL_MS = 12 * 60 * 1000;
 
 const CONTENT_PACKS: readonly ChallengePackOption[] = (DEFAULT_GAME_CONTENT.packs ?? []).map((pack) => ({
   id: pack.id,
@@ -106,12 +125,25 @@ function formatAssistLabel(color: { r: number; g: number; b: number }): string {
 export function App() {
   const canvasHostRef = useRef<HTMLDivElement | null>(null);
   const soundPlayerRef = useRef<UiSoundPlayer | null>(null);
+  const pendingGuardianActionRef = useRef<(() => void) | null>(null);
 
   const [mode, setMode] = useState<GameMode>("solve");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [highContrastEnabled, setHighContrastEnabled] = useState(false);
   const [colorAssistEnabled, setColorAssistEnabled] = useState(false);
+  const [breakReminderEnabled, setBreakReminderEnabled] = useState(false);
+  const [breakReminderVisible, setBreakReminderVisible] = useState(false);
   const [selectedPackId, setSelectedPackId] = useState(ALL_PACK_ID);
+  const [sessionInsights, setSessionInsights] = useState<SessionInsights>(() =>
+    createDefaultSessionInsights()
+  );
+  const [guardianChallenge, setGuardianChallenge] = useState<GuardianChallenge>(() =>
+    createGuardianChallenge()
+  );
+  const [guardianAnswer, setGuardianAnswer] = useState("");
+  const [guardianError, setGuardianError] = useState<string | null>(null);
+  const [guardianGateVisible, setGuardianGateVisible] = useState(false);
+  const [guardianUnlockedAt, setGuardianUnlockedAt] = useState<number | null>(null);
 
   const [solvePhase, setSolvePhase] = useState<SolvePhase>("landing");
   const [solveChallenge, setSolveChallenge] = useState<SolveChallenge>(() =>
@@ -239,6 +271,7 @@ export function App() {
     () => diaryEntries.find((entry) => entry.id === selectedDiaryEntryId) ?? null,
     [diaryEntries, selectedDiaryEntryId]
   );
+  const guardianUnlocked = isGuardianUnlockActive(guardianUnlockedAt);
 
   useEffect(() => {
     if (visibleDiaryEntries.length === 0) {
@@ -381,6 +414,8 @@ export function App() {
     setSoundEnabled(readSoundEnabled(window.localStorage));
     setHighContrastEnabled(readHighContrastEnabled(window.localStorage));
     setColorAssistEnabled(readColorAssistEnabled(window.localStorage));
+    setBreakReminderEnabled(readBreakReminderEnabled(window.localStorage));
+    setSessionInsights(readSessionInsights(window.localStorage));
 
     const entries = readDiaryEntries(window.localStorage);
     setDiaryEntries(entries);
@@ -420,6 +455,58 @@ export function App() {
   }, [colorAssistEnabled]);
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    writeBreakReminderEnabled(breakReminderEnabled, window.localStorage);
+  }, [breakReminderEnabled]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    writeSessionInsights(sessionInsights, window.localStorage);
+  }, [sessionInsights]);
+
+  useEffect(() => {
+    if (guardianUnlockedAt === null || typeof window === "undefined") {
+      return;
+    }
+
+    const elapsedMs = Date.now() - guardianUnlockedAt;
+    const remainingMs = Math.max(0, GUARDIAN_UNLOCK_DURATION_MS - elapsedMs);
+
+    if (remainingMs <= 0) {
+      setGuardianUnlockedAt(null);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setGuardianUnlockedAt(null);
+    }, remainingMs);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [guardianUnlockedAt]);
+
+  useEffect(() => {
+    if (!breakReminderEnabled || typeof window === "undefined") {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setBreakReminderVisible(true);
+    }, BREAK_REMINDER_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [breakReminderEnabled]);
+
+  useEffect(() => {
     if (!selectedDiaryEntry) {
       setDiaryDraftTitle("");
       setDiaryDraftNote("");
@@ -430,11 +517,61 @@ export function App() {
     setDiaryDraftNote(selectedDiaryEntry.note);
   }, [selectedDiaryEntry]);
 
+  const runWithGuardianGate = (action: () => void) => {
+    if (isGuardianUnlockActive(guardianUnlockedAt)) {
+      action();
+      return;
+    }
+
+    pendingGuardianActionRef.current = action;
+    setGuardianChallenge(createGuardianChallenge());
+    setGuardianAnswer("");
+    setGuardianError(null);
+    setGuardianGateVisible(true);
+  };
+
+  const closeGuardianGate = () => {
+    pendingGuardianActionRef.current = null;
+    setGuardianAnswer("");
+    setGuardianError(null);
+    setGuardianGateVisible(false);
+  };
+
+  const submitGuardianGate = () => {
+    if (!verifyGuardianAnswer(guardianChallenge, guardianAnswer)) {
+      setGuardianError("That answer does not match. Ask a grown-up and try again.");
+      playCue("error");
+      return;
+    }
+
+    setGuardianUnlockedAt(Date.now());
+    setGuardianError(null);
+    setGuardianAnswer("");
+    setGuardianGateVisible(false);
+    playCue("success");
+
+    const pendingAction = pendingGuardianActionRef.current;
+    pendingGuardianActionRef.current = null;
+    pendingAction?.();
+  };
+
+  const dismissBreakReminder = () => {
+    setBreakReminderVisible(false);
+    playCue("tap");
+  };
+
+  const disableBreakReminder = () => {
+    setBreakReminderEnabled(false);
+    setBreakReminderVisible(false);
+    playCue("tap");
+  };
+
   const startSolveChallenge = () => {
     setDroppedPigments([]);
     setSolveResult(null);
     setSolvePhase("mixing");
     setSolveSessionKey((previous) => previous + 1);
+    setSessionInsights((current) => recordModeStart(current, "solve"));
     playCue("start");
   };
 
@@ -464,6 +601,7 @@ export function App() {
 
     setSolveResult(result);
     setSolvePhase("result");
+    setSessionInsights((current) => recordModeCompletion(current, "solve"));
     playCue(result.passed ? "success" : "error");
   };
 
@@ -471,6 +609,7 @@ export function App() {
     setPredictSelectedOptionId(null);
     setPredictResult(null);
     setPredictPhase("guessing");
+    setSessionInsights((current) => recordModeStart(current, "predict"));
     playCue("start");
   };
 
@@ -495,6 +634,7 @@ export function App() {
 
     setPredictResult(evaluation);
     setPredictPhase("result");
+    setSessionInsights((current) => recordModeCompletion(current, "predict"));
     playCue(evaluation.isCorrect ? "success" : "error");
   };
 
@@ -502,6 +642,7 @@ export function App() {
     setDiscriminateSelectedOptionId(null);
     setDiscriminateResult(null);
     setDiscriminatePhase("guessing");
+    setSessionInsights((current) => recordModeStart(current, "discriminate"));
     playCue("start");
   };
 
@@ -528,6 +669,7 @@ export function App() {
 
     setDiscriminateResult(evaluation);
     setDiscriminatePhase("result");
+    setSessionInsights((current) => recordModeCompletion(current, "discriminate"));
     playCue(evaluation.isCorrect ? "success" : "error");
   };
 
@@ -566,6 +708,11 @@ export function App() {
     playCue("tap");
   };
 
+  const toggleBreakReminder = () => {
+    setBreakReminderEnabled((current) => !current);
+    playCue("tap");
+  };
+
   const exportDiaryToJson = () => {
     if (typeof window === "undefined") {
       return;
@@ -582,6 +729,7 @@ export function App() {
     anchor.click();
 
     window.URL.revokeObjectURL(url);
+    setSessionInsights((current) => recordDiaryAction(current, "export"));
     playCue("save");
   };
 
@@ -601,6 +749,7 @@ export function App() {
       setDiaryEntries((current) => mergeDiaryEntries(current, importedEntries));
       setSelectedDiaryEntryId(importedEntries[0]?.id ?? null);
       setDiaryImportError(null);
+      setSessionInsights((current) => recordDiaryAction(current, "import"));
       playCue("save");
     } catch (error) {
       setDiaryImportError(
@@ -624,6 +773,7 @@ export function App() {
   const addDiaryEntry = (entry: DiaryEntry) => {
     setDiaryEntries((current) => prependDiaryEntry(current, entry));
     setSelectedDiaryEntryId(entry.id);
+    setSessionInsights((current) => recordDiaryAction(current, "save"));
     setMode("collect");
     playCue("save");
   };
@@ -690,6 +840,24 @@ export function App() {
 
     setDiaryEntries((current) => removeDiaryEntry(current, selectedDiaryEntry.id));
     playCue("delete");
+  };
+
+  const requestDiaryExport = () => {
+    runWithGuardianGate(exportDiaryToJson);
+  };
+
+  const requestDiaryImport = (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    runWithGuardianGate(() => {
+      void importDiaryFromFile(file);
+    });
+  };
+
+  const requestDeleteSelectedDiaryEntry = () => {
+    runWithGuardianGate(deleteSelectedDiaryEntry);
   };
 
   const modeDescription =
@@ -784,6 +952,17 @@ export function App() {
           >
             High Contrast: {highContrastEnabled ? "On" : "Off"}
           </button>
+          <button
+            type="button"
+            className={`sound-toggle ${breakReminderEnabled ? "active" : ""}`}
+            onClick={toggleBreakReminder}
+            aria-pressed={breakReminderEnabled}
+          >
+            Break Reminder: {breakReminderEnabled ? "On" : "Off"}
+          </button>
+          <p className={`guardian-note ${guardianUnlocked ? "unlocked" : ""}`}>
+            Grown-up actions: {guardianUnlocked ? "Unlocked" : "Locked"}
+          </p>
           <p className="motion-note">Motion effects respect your system reduced-motion setting.</p>
         </div>
       </header>
@@ -1469,6 +1648,23 @@ export function App() {
             <h2>Color Diary</h2>
             <p>Save and organize your favorite outcomes from Solve, Predict, and Find the Twin.</p>
             <p className="diary-prompt">Daily Prompt: {dailyDiaryPrompt}</p>
+            <section className="insights-panel" aria-label="Session insights">
+              <h3>Session Insights</h3>
+              <p className="hint">
+                Started {new Date(sessionInsights.startedAt).toLocaleTimeString()} | Updated{" "}
+                {new Date(sessionInsights.updatedAt).toLocaleTimeString()}
+              </p>
+              <ul className="insights-list">
+                <li>Challenges started: {sessionInsights.totalChallengesStarted}</li>
+                <li>Challenges completed: {sessionInsights.totalChallengesCompleted}</li>
+                <li>
+                  Solve/Predict/Twin starts: {sessionInsights.modeStarts.solve}/
+                  {sessionInsights.modeStarts.predict}/{sessionInsights.modeStarts.discriminate}
+                </li>
+                <li>Diary saves: {sessionInsights.diarySaves}</li>
+                <li>Diary imports/exports: {sessionInsights.diaryImports}/{sessionInsights.diaryExports}</li>
+              </ul>
+            </section>
 
             <div className="diary-toolbar">
               <label>
@@ -1507,7 +1703,7 @@ export function App() {
             </div>
 
             <div className="action-row">
-              <button type="button" className="button button-secondary" onClick={exportDiaryToJson}>
+              <button type="button" className="button button-secondary" onClick={requestDiaryExport}>
                 Export JSON
               </button>
               <label className="import-label">
@@ -1515,11 +1711,11 @@ export function App() {
                 <input
                   type="file"
                   accept="application/json,.json"
-                  onChange={async (event) => {
+                  onChange={(event) => {
                     const input = event.target;
                     const file = input.files?.[0] ?? null;
 
-                    await importDiaryFromFile(file);
+                    requestDiaryImport(file);
                     input.value = "";
                   }}
                 />
@@ -1603,7 +1799,11 @@ export function App() {
                   <button type="button" className="button button-primary" onClick={saveDiaryDraft}>
                     Save Changes
                   </button>
-                  <button type="button" className="button button-ghost" onClick={deleteSelectedDiaryEntry}>
+                  <button
+                    type="button"
+                    className="button button-ghost"
+                    onClick={requestDeleteSelectedDiaryEntry}
+                  >
                     Delete Entry
                   </button>
                 </div>
@@ -1616,6 +1816,66 @@ export function App() {
             )}
           </aside>
         </section>
+      )}
+
+      {guardianGateVisible && (
+        <div className="overlay" role="presentation">
+          <section
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="guardian-gate-title"
+          >
+            <p className="eyebrow">Grown-up Check</p>
+            <h2 id="guardian-gate-title">Ask a grown-up to unlock this action</h2>
+            <p>Solve this quick check: {guardianChallenge.prompt}</p>
+            <label>
+              Answer
+              <input
+                type="text"
+                inputMode="numeric"
+                value={guardianAnswer}
+                onChange={(event) => setGuardianAnswer(event.target.value)}
+                placeholder="Type the result"
+              />
+            </label>
+            {guardianError && <p className="limit-warning">{guardianError}</p>}
+            <div className="action-row">
+              <button type="button" className="button button-primary" onClick={submitGuardianGate}>
+                Unlock for 10 Minutes
+              </button>
+              <button type="button" className="button button-ghost" onClick={closeGuardianGate}>
+                Cancel
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {breakReminderVisible && (
+        <div className="overlay" role="presentation">
+          <section
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="break-reminder-title"
+          >
+            <p className="eyebrow">Wellbeing Pause</p>
+            <h2 id="break-reminder-title">Time for a short eye break</h2>
+            <p>
+              Look away from the screen, stretch your shoulders, and rest for about 20 seconds.
+              You can continue as soon as you are ready.
+            </p>
+            <div className="action-row">
+              <button type="button" className="button button-primary" onClick={dismissBreakReminder}>
+                Continue Playing
+              </button>
+              <button type="button" className="button button-ghost" onClick={disableBreakReminder}>
+                Turn Reminder Off
+              </button>
+            </div>
+          </section>
+        </div>
       )}
     </main>
   );

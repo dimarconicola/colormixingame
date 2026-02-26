@@ -90,6 +90,7 @@ Key features:
 2. View cards with recipe and usage note.
 3. Build collection wall by theme or date.
 4. Support optional daily prompts.
+5. Support parent-gated import/export and safe delete flows.
 
 ## 6. Session Loop
 
@@ -142,6 +143,7 @@ V1 requirements:
 2. Color-blind-safe helper overlays for discrimination mode.
 3. Touch target minimum size for children.
 4. Hints must use plain language + visual cues.
+5. Optional wellbeing break reminders for sustained sessions.
 
 ## 11. Privacy and Safety
 
@@ -149,6 +151,7 @@ V1 requirements:
 2. Minimal first-party analytics only when needed.
 3. No ads, no tracking SDKs, no third-party profiling.
 4. Parent-trust posture in all defaults and copy.
+5. Parent-gate protection for adult-only actions (destructive/portability/outbound).
 
 ## 12. V1 Scope Boundary
 
@@ -184,4 +187,3 @@ Excluded from V1:
    Mitigation: explicit progression design and predict-mode emphasis.
 4. Risk: over-scoped first release.
    Mitigation: strict V1 boundary and backlog discipline.
-

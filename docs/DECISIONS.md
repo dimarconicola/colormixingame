@@ -157,3 +157,30 @@ Template:
 - Decision: Implement authoring tooling in `@colormix/content` as reusable template APIs plus a CLI (`authoring:template`) for challenge/pack scaffolding.
 - Alternatives considered: hand-edit content only; build a full graphical editor immediately.
 - Consequences: faster and more consistent content creation today with minimal maintenance overhead; full visual editor remains optional for future scale.
+
+## ADR-017
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: Kids-platform compliance and parent trust require guardrails for destructive and portability actions in a child-facing UI.
+- Decision: Add a guardian challenge gate in the web app for adult diary actions (export/import/delete), with temporary unlock windows for smoother parent workflows.
+- Alternatives considered: unrestricted actions in child UI; separate hidden settings route without per-action gating.
+- Consequences: stronger trust/compliance posture and reduced accidental destructive operations; adds small UX friction and additional state management complexity.
+
+## ADR-018
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: Post-result retention loops benefit from lightweight observability, but privacy constraints disallow third-party tracking-first approaches.
+- Decision: Implement local-first session insights persistence (`colormix.insights.v1`) tracking mode starts/completions and diary actions, surfaced in-app for transparent feedback.
+- Alternatives considered: no telemetry before cloud sync; third-party analytics SDK integration.
+- Consequences: immediate quality feedback loop without external data exposure; adaptive progression remains a follow-up phase using this baseline dataset.
+
+## ADR-019
+
+- Date: 2026-02-25
+- Status: accepted
+- Context: Local diary persistence is high-value user data and must tolerate malformed storage payloads and partial corruption.
+- Decision: Dual-write diary payloads to primary and backup keys, with fallback reads from backup when primary payload is invalid.
+- Alternatives considered: single-key storage only; full schema migration layer before backup strategy.
+- Consequences: stronger reliability with minimal complexity; future schema migrations must update both keys consistently.

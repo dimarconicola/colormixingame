@@ -170,6 +170,17 @@ code {
   font-size: 0.83rem;
 }
 
+.guardian-note {
+  margin: 0;
+  color: #6a5b45;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.guardian-note.unlocked {
+  color: #0f5448;
+}
+
 .assist-chip {
   border-radius: 999px;
   border: 1px solid #dad1c1;
@@ -412,6 +423,24 @@ code {
   color: #4b4e59;
   padding: 0.55rem 0.7rem;
   font-size: 0.88rem;
+}
+
+.insights-panel {
+  border-radius: 12px;
+  border: 1px solid #d8cebe;
+  background: #f7f1e5;
+  padding: 0.6rem 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.insights-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: #404751;
+  display: grid;
+  gap: 0.18rem;
+  font-size: 0.84rem;
 }
 
 .diary-side {
@@ -660,6 +689,50 @@ code {
 
 .app-shell.high-contrast .target-swatch {
   border-color: rgba(0, 0, 0, 0.7);
+}
+
+.app-shell.high-contrast .insights-panel,
+.app-shell.high-contrast .modal-card {
+  border-color: #111827;
+  background: #ffffff;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 21, 26, 0.48);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 20;
+}
+
+.modal-card {
+  width: min(460px, 100%);
+  border-radius: 16px;
+  border: 1px solid #e8decd;
+  background: #fffdfa;
+  box-shadow: 0 16px 34px rgba(16, 24, 40, 0.24);
+  padding: 1rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.modal-card label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.84rem;
+  color: #4f5767;
+}
+
+.modal-card input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #ddd5c6;
+  background: #ffffff;
+  color: #1c1d1f;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
 }
 
 @keyframes surface-enter {

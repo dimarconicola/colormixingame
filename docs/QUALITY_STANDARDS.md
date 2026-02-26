@@ -61,6 +61,7 @@ Performance workflow:
 2. Touch targets suitable for children.
 3. Clear visual plus textual feedback for outcomes.
 4. Non-color-only cues in critical gameplay feedback when possible.
+5. Adult-only actions (destructive, portability, outbound) must use a parent-gate flow.
 
 ## 7. Reliability Standards
 
@@ -68,6 +69,7 @@ Performance workflow:
 2. Save/load operations must be transaction-safe.
 3. Schema migrations must preserve existing diary and progression state.
 4. Recoverable error paths should not trap user sessions.
+5. Critical local data must support corruption-tolerant fallback reads.
 
 ## 8. Privacy and Trust Standards
 
@@ -75,6 +77,7 @@ Performance workflow:
 2. Minimal first-party telemetry only when justified.
 3. No ad network SDKs.
 4. Clear parent-friendly defaults and language.
+5. Release checklist must include Apple Kids Category and Google Play Families compliance checks.
 
 ## 9. Release Gates
 
@@ -90,4 +93,3 @@ A release candidate is blocked if any condition below is true:
 1. Feature owner must update docs and tests.
 2. Reviewer validates quality gates before approval.
 3. Backlog status must reflect shipped vs pending work.
-

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  DIARY_BACKUP_STORAGE_KEY,
+  DIARY_STORAGE_KEY,
   createDiaryEntryFromDiscriminate,
   createDiaryEntryFromPredict,
   createDiaryEntryFromSolve,
@@ -7,10 +9,12 @@ import {
   mergeDiaryEntries,
   parseDiaryEntries,
   prependDiaryEntry,
+  readDiaryEntries,
   removeDiaryEntry,
   serializeDiaryEntries,
   selectDiaryEntries,
   updateDiaryEntry,
+  writeDiaryEntries,
   type DiaryEntry
 } from "./diary";
 import { DISCRIMINATE_CHALLENGES, evaluateDiscriminateAttempt } from "./discriminate";
@@ -23,6 +27,32 @@ function firstOrThrow<T>(value: T | null | undefined, message: string): T {
   }
 
   throw new Error(message);
+}
+
+function createStorageStub(initialValues: Record<string, string> = {}): Storage {
+  const store = new Map<string, string>(Object.entries(initialValues));
+
+  return {
+    get length() {
+      return store.size;
+    },
+    clear() {
+      store.clear();
+    },
+    getItem(key) {
+      return store.get(key) ?? null;
+    },
+    key(index) {
+      const keys = [...store.keys()];
+      return keys[index] ?? null;
+    },
+    removeItem(key) {
+      store.delete(key);
+    },
+    setItem(key, value) {
+      store.set(key, value);
+    }
+  };
 }
 
 describe("parseDiaryEntries", () => {
@@ -54,6 +84,52 @@ describe("parseDiaryEntries", () => {
 
     expect(parsed).toHaveLength(1);
     expect(parsed[0]?.id).toBe("a");
+  });
+});
+
+describe("diary storage resilience", () => {
+  it("writes primary and backup payloads", () => {
+    const storage = createStorageStub();
+    const entries: DiaryEntry[] = [
+      {
+        id: "storage-entry",
+        sourceMode: "solve",
+        challengeId: "solve-1",
+        title: "Stored",
+        note: "",
+        swatchHex: "#abcdef",
+        summary: "stored",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z"
+      }
+    ];
+
+    writeDiaryEntries(entries, storage);
+
+    expect(storage.getItem(DIARY_STORAGE_KEY)).toBeTruthy();
+    expect(storage.getItem(DIARY_BACKUP_STORAGE_KEY)).toBe(storage.getItem(DIARY_STORAGE_KEY));
+  });
+
+  it("falls back to backup payload when primary storage is corrupted", () => {
+    const backupEntries: DiaryEntry[] = [
+      {
+        id: "backup-entry",
+        sourceMode: "predict",
+        challengeId: "predict-1",
+        title: "Backup",
+        note: "",
+        swatchHex: "#112233",
+        summary: "backup",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z"
+      }
+    ];
+    const storage = createStorageStub({
+      [DIARY_STORAGE_KEY]: "{broken-json",
+      [DIARY_BACKUP_STORAGE_KEY]: JSON.stringify(backupEntries)
+    });
+
+    expect(readDiaryEntries(storage)).toEqual(backupEntries);
   });
 });
 

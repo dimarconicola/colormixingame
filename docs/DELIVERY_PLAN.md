@@ -16,6 +16,7 @@ This plan is intentionally detailed on architecture and quality, while keeping f
 4. Content authoring tooling baseline is now available via `@colormix/content` template APIs and CLI scaffolding (`B-019`).
 5. M5 optional packaging is scaffolded with Capacitor config/scripts and a runbook (`B-013`), pending local CocoaPods/Xcode bootstrap.
 6. Optional post-V1 cloud sync architecture is defined with deterministic merge contracts (`B-014`).
+7. Research-driven trust/wellbeing/reliability upgrades are now in place (`B-020` to `B-023`): guardian-gated adult diary actions, break reminders, local session insights, and resilient diary backup fallback.
 
 ## 2. Release Strategy
 
@@ -25,6 +26,7 @@ This plan is intentionally detailed on architecture and quality, while keeping f
 4. `Milestone M3`: Discriminate + Collect modes production-ready.
 5. `Milestone M4`: Content balancing, polish, and beta stabilization.
 6. `Milestone M5`: Optional iPad packaging track.
+7. `Milestone M6`: Benchmark-driven refinement and adaptive progression.
 
 ## 3. Milestone Details
 
@@ -142,6 +144,26 @@ Exit criteria:
 
 1. Core loops function correctly in iPad runtime.
 2. Packaging process repeatable.
+
+## 3.7 M6 - Benchmark-Driven Refinement
+
+Objectives:
+
+1. Align product quality with top kids-app trust and polish benchmarks.
+2. Use session insights to drive adaptive challenge progression.
+3. Harden portability and reliability flows for parent confidence.
+
+Deliverables:
+
+1. Guardian-gated adult actions for portability/destructive diary operations.
+2. Session wellbeing loop (break reminders) and insights-driven progression roadmap.
+3. Reliability hardening for diary storage resilience and regression coverage.
+
+Exit criteria:
+
+1. Adult-only actions are parent-gated and tested.
+2. Session reminders and insights persistence are stable.
+3. Adaptive progression backlog is decomposed into implementation-ready items.
 
 ## 4. Cross-Cutting Workstreams
 

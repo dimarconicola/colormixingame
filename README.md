@@ -68,11 +68,15 @@ Platform details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 14. Color Diary retention upgrades: daily prompts plus JSON import/export with merge-safe ingestion.
 15. Content depth upgrade: second curated pack (`full-spectrum-lab`) and pack-aware challenge filtering in app.
 16. Tooling: strict TypeScript, ESLint (flat config), Prettier, Vitest, Playwright.
-17. Baseline E2E coverage: mode switching, diary flow, and pack/accessibility controls.
+17. Baseline E2E coverage: mode switching, diary flow, guardian-gated delete path, and pack/accessibility controls.
 18. Optional iPad packaging track scaffolded with Capacitor config/scripts and runbook.
 19. Optional cloud sync architecture contracts in `@colormix/game-domain` + dedicated architecture doc.
 20. Content authoring toolkit: challenge/pack template APIs and CLI scaffolding in `@colormix/content`.
-21. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
+21. Parent-gated diary actions for export/import/delete with temporary adult unlock window.
+22. Session wellbeing pass: persisted break reminders with timed modal prompts.
+23. Local-first session insights telemetry surfaced in Color Diary for quality tuning.
+24. Diary resilience hardening: dual-write backup key and fallback reads on corrupted primary payload.
+25. CI: GitHub Actions pipeline for lint/typecheck/test/e2e/content validation/build.
 
 ## Repository Layout
 
@@ -156,6 +160,7 @@ Backlog source of truth: [`docs/BACKLOG.md`](docs/BACKLOG.md).
 8. iPad packaging runbook: [`docs/IPAD_PACKAGING.md`](docs/IPAD_PACKAGING.md)
 9. Cloud sync architecture: [`docs/CLOUD_SYNC_ARCHITECTURE.md`](docs/CLOUD_SYNC_ARCHITECTURE.md)
 10. Content authoring toolkit: [`docs/CONTENT_AUTHORING.md`](docs/CONTENT_AUTHORING.md)
+11. Kids game benchmark and strategic plan: [`docs/KIDS_GAME_BENCHMARK_2026.md`](docs/KIDS_GAME_BENCHMARK_2026.md)
 
 ## Current Status
 
@@ -170,8 +175,9 @@ Current repository state:
 7. Challenge content schema and validation pipeline are implemented in `@colormix/content` and wired into CI.
 8. Two curated challenge packs and pack-aware challenge filtering are implemented.
 9. Sound/motion polish, accessibility controls, diary portability, and baseline E2E hardening are complete for M4.
-10. Optional iPad packaging and optional cloud-sync architecture tracks are scaffolded for post-V1 rollout.
-11. Content authoring toolkit baseline is available for scalable challenge/pack creation.
+10. Research-driven trust and reliability pass is complete with guardian-gated diary actions, break reminders, session insights, and diary backup fallback.
+11. Optional iPad packaging and optional cloud-sync architecture tracks are scaffolded for post-V1 rollout.
+12. Content authoring toolkit baseline is available for scalable challenge/pack creation.
 
 ## Source Notes
 

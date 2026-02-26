@@ -1,6 +1,7 @@
 export const SOUND_ENABLED_STORAGE_KEY = "colormix.sound.enabled.v1";
 export const HIGH_CONTRAST_STORAGE_KEY = "colormix.contrast.enabled.v1";
 export const COLOR_ASSIST_STORAGE_KEY = "colormix.colorassist.enabled.v1";
+export const BREAK_REMINDER_ENABLED_STORAGE_KEY = "colormix.breakreminder.enabled.v1";
 
 type StorageLike = Pick<Storage, "getItem" | "setItem">;
 
@@ -115,6 +116,10 @@ export function parseColorAssistEnabled(rawValue: string | null | undefined): bo
   return parseBooleanPreference(rawValue, false);
 }
 
+export function parseBreakReminderEnabled(rawValue: string | null | undefined): boolean {
+  return parseBooleanPreference(rawValue, false);
+}
+
 function parseBooleanPreference(
   rawValue: string | null | undefined,
   fallback: boolean
@@ -185,6 +190,25 @@ export function writeColorAssistEnabled(
   }
 
   storage.setItem(COLOR_ASSIST_STORAGE_KEY, enabled ? "1" : "0");
+}
+
+export function readBreakReminderEnabled(storage: StorageLike | null | undefined): boolean {
+  if (!storage) {
+    return false;
+  }
+
+  return parseBreakReminderEnabled(storage.getItem(BREAK_REMINDER_ENABLED_STORAGE_KEY));
+}
+
+export function writeBreakReminderEnabled(
+  enabled: boolean,
+  storage: StorageLike | null | undefined
+): void {
+  if (!storage) {
+    return;
+  }
+
+  storage.setItem(BREAK_REMINDER_ENABLED_STORAGE_KEY, enabled ? "1" : "0");
 }
 
 export function createUiSoundPlayer(): UiSoundPlayer {
