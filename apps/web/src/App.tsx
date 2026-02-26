@@ -872,19 +872,69 @@ export function App() {
   return (
     <main className={`app-shell ${highContrastEnabled ? "high-contrast" : ""}`}>
       <header className="hero">
-        <p className="eyebrow">Color Mixing Game</p>
-        <h1>
-          {mode === "solve"
-            ? "Solve Mode"
-            : mode === "predict"
-              ? "Predict Mode"
-              : mode === "discriminate"
-                ? "Find the Twin Mode"
-                : "Color Diary"}{" "}
-          Vertical Slice
-        </h1>
-        <p>{modeDescription}</p>
-        {mode !== "collect" && <p className="pack-note">Current pack: {selectedPackTitle}</p>}
+        <div className="hero-top">
+          <div className="hero-brand">
+            <div className="hero-mascot" aria-hidden="true">
+              <span className="hero-mascot-dot" />
+            </div>
+            <div>
+              <p className="eyebrow">Color Mixing Game</p>
+              <h1>
+                {mode === "solve"
+                  ? "Solve Mode"
+                  : mode === "predict"
+                    ? "Predict Mode"
+                    : mode === "discriminate"
+                      ? "Find the Twin Mode"
+                      : "Color Diary"}{" "}
+                Vertical Slice
+              </h1>
+              <p className="hero-description">{modeDescription}</p>
+              {mode !== "collect" && <p className="pack-note">Current pack: {selectedPackTitle}</p>}
+            </div>
+          </div>
+
+          <div className="polish-controls">
+            <label className="pack-select">
+              Pack
+              <select value={selectedPackId} onChange={(event) => setSelectedPackId(event.target.value)}>
+                {availablePackOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              className={`sound-toggle ${soundEnabled ? "active" : ""}`}
+              onClick={toggleSound}
+              aria-pressed={soundEnabled}
+            >
+              Sound: {soundEnabled ? "On" : "Off"}
+            </button>
+            <button
+              type="button"
+              className={`sound-toggle ${highContrastEnabled ? "active" : ""}`}
+              onClick={toggleHighContrast}
+              aria-pressed={highContrastEnabled}
+            >
+              High Contrast: {highContrastEnabled ? "On" : "Off"}
+            </button>
+            <button
+              type="button"
+              className={`sound-toggle ${breakReminderEnabled ? "active" : ""}`}
+              onClick={toggleBreakReminder}
+              aria-pressed={breakReminderEnabled}
+            >
+              Break Reminder: {breakReminderEnabled ? "On" : "Off"}
+            </button>
+            <p className={`guardian-note ${guardianUnlocked ? "unlocked" : ""}`}>
+              Grown-up actions: {guardianUnlocked ? "Unlocked" : "Locked"}
+            </p>
+            <p className="motion-note">Motion effects respect your system reduced-motion setting.</p>
+          </div>
+        </div>
 
         <div className="mode-switch" role="tablist" aria-label="Game mode switch">
           <button
@@ -923,47 +973,6 @@ export function App() {
           >
             Color Diary
           </button>
-        </div>
-
-        <div className="polish-controls">
-          <label className="pack-select">
-            Pack
-            <select value={selectedPackId} onChange={(event) => setSelectedPackId(event.target.value)}>
-              {availablePackOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            className={`sound-toggle ${soundEnabled ? "active" : ""}`}
-            onClick={toggleSound}
-            aria-pressed={soundEnabled}
-          >
-            Sound: {soundEnabled ? "On" : "Off"}
-          </button>
-          <button
-            type="button"
-            className={`sound-toggle ${highContrastEnabled ? "active" : ""}`}
-            onClick={toggleHighContrast}
-            aria-pressed={highContrastEnabled}
-          >
-            High Contrast: {highContrastEnabled ? "On" : "Off"}
-          </button>
-          <button
-            type="button"
-            className={`sound-toggle ${breakReminderEnabled ? "active" : ""}`}
-            onClick={toggleBreakReminder}
-            aria-pressed={breakReminderEnabled}
-          >
-            Break Reminder: {breakReminderEnabled ? "On" : "Off"}
-          </button>
-          <p className={`guardian-note ${guardianUnlocked ? "unlocked" : ""}`}>
-            Grown-up actions: {guardianUnlocked ? "Unlocked" : "Locked"}
-          </p>
-          <p className="motion-note">Motion effects respect your system reduced-motion setting.</p>
         </div>
       </header>
 
